@@ -3,574 +3,637 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operation Sindoor | The Master Record</title>
-    
-    <!-- Fonts: Inter & JetBrains Mono for the "Classified" look -->
+    <title>Operation Sindoor: The Digital Dossier</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP (GreenSock Animation Platform) + ScrollTrigger Plugin CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- GSAP & Lenis -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.29/dist/lenis.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 
+    <!-- Custom Styles -->
     <style>
-        :root {
-            --bg-color: #050505;
-            --accent-red: #ff3333;
-            --accent-green: #00ff41;
-            --text-muted: #888888;
-            --grid-line: rgba(255, 255, 255, 0.05);
-        }
-
+        /* Base styling */
         body {
-            background-color: var(--bg-color);
-            color: #ffffff;
             font-family: 'Inter', sans-serif;
+            background-color: #020617; /* slate-950 */
+            color: #cbd5e1; /* slate-300 */
             overflow-x: hidden;
-            cursor: crosshair; /* Tactical feel */
         }
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .display { font-family: 'Oswald', sans-serif; }
+        /* Custom scrollbar for a more "premium" feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; /* slate-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; /* slate-800 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155; /* slate-700 */
+        }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; }
+        /* Accent color */
+        .text-accent {
+            color: #2dd4bf; /* teal-400 */
+        }
+        .bg-accent {
+            background-color: #2dd4bf; /* teal-400 */
+        }
+        .border-accent {
+            border-color: #2dd4bf; /* teal-400 */
+        }
 
-        /* Tactical Grid Background */
-        .bg-grid {
-            background-size: 100px 100px;
-            background-image: 
-                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+        /* Hero scroll-down indicator animation */
+        .scroll-indicator {
+            animation: bounce-subtle 2s infinite;
+        }
+        @keyframes bounce-subtle {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Preloader */
+        #preloader {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Glitch Effect Class */
-        .glitch-text {
-            position: relative;
-        }
-        
-        /* Loader Styles */
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #020617; /* slate-950 */
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+        .loader-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #2dd4bf; /* teal-400 */
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: loader-bounce 1.4s infinite ease-in-out both;
+        }
+        .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes loader-bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
-        /* Scrollytelling visual aids */
-        .line-trace {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: linear-gradient(to bottom, transparent, var(--accent-red), transparent);
-            transform: translateX(-50%);
-            opacity: 0.3;
-        }
-
-        .card-blur {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .red-dot {
-            box-shadow: 0 0 15px var(--accent-red);
-        }
-
-        /* Text Reveals */
-        .reveal-text span {
+        #main-content {
             opacity: 0;
-            transform: translateY(20px);
-            display: inline-block;
+            transition: opacity 0.5s ease-in;
+        }
+
+        /* Dotted grid background for sections */
+        .dotted-background {
+            background-image: radial-gradient(#1e293b 1px, transparent 0);
+            background-size: 20px 20px;
         }
         
-        .hero-title {
-            line-height: 0.9;
-            text-transform: uppercase;
+        /* Glassmorphism card effect */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6); /* slate-900 with alpha */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(30, 41, 59, 0.5); /* slate-800 with alpha */
         }
     </style>
 </head>
-<body class="antialiased selection:bg-red-900 selection:text-white">
+<body class="antialiased">
 
-    <!-- Background Elements -->
-    <div class="bg-grid"></div>
-    <div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20 z-0" style="background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 70%);"></div>
-
-    <!-- LOADER -->
-    <div id="loader">
-        <div class="mono text-xs text-green-500 mb-4 tracking-widest">DECRYPTING MASTER RECORD...</div>
-        <div class="w-64 h-1 bg-gray-900 rounded overflow-hidden">
-            <div id="progress-bar" class="h-full bg-green-500 w-0"></div>
-        </div>
-        <div class="mt-2 mono text-[10px] text-gray-500">SECURE CONNECTION ESTABLISHED</div>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
     </div>
 
-    <!-- NAVIGATION (Minimal) -->
-    <nav class="fixed top-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference">
-        <div class="mono text-xs tracking-[0.2em] opacity-70">CONFIDENTIAL // DOSSIER</div>
-        <div class="mono text-xs text-red-500 animate-pulse">● LIVE RECORD</div>
-    </nav>
+    <!-- Main Content (Initially hidden) -->
+    <div id="main-content">
 
-    <!-- HERO SECTION -->
-    <section class="min-h-screen flex flex-col justify-center items-center relative px-4" id="hero">
-        <div class="absolute inset-0 flex items-center justify-center opacity-10">
-            <!-- Abstract Radar SVG -->
-            <svg width="600" height="600" viewBox="0 0 100 100" class="animate-spin-slow w-[80vw] h-[80vw] max-w-[600px] max-h-[600px]">
-                <circle cx="50" cy="50" r="48" fill="none" stroke="white" stroke-width="0.2" stroke-dasharray="2 2" />
-                <circle cx="50" cy="50" r="35" fill="none" stroke="white" stroke-width="0.1" />
-                <line x1="50" y1="50" x2="50" y2="2" stroke="white" stroke-width="0.2" />
-            </svg>
-        </div>
-        
-        <div class="z-10 text-center">
-            <p class="mono text-sm md:text-base text-gray-400 mb-4 tracking-widest overflow-hidden">
-                <span class="inline-block" id="hero-subtitle">THE CHRONOLOGICAL MATRIX</span>
-            </p>
-            <h1 class="display hero-title text-[15vw] md:text-[12vw] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800">
-                OPERATION<br>SINDOOR
-            </h1>
-            <div class="mt-8 flex justify-center gap-4 opacity-0" id="hero-meta">
-                <div class="border border-white/20 px-4 py-2 rounded-full">
-                    <span class="mono text-xs text-red-500">START: 2025-04-22</span>
-                </div>
-                <div class="border border-white/20 px-4 py-2 rounded-full">
-                    <span class="mono text-xs text-green-500">STATUS: VICTORY</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-            <span class="mono text-[10px]">SCROLL TO DECLASSIFY</span>
-            <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
-        </div>
-    </section>
-
-    <!-- CONTEXT SECTION -->
-    <section class="py-24 md:py-40 px-6 max-w-4xl mx-auto relative">
-        <div class="absolute -left-10 top-0 text-[20rem] font-bold text-white opacity-[0.02] select-none pointer-events-none display">
-            01
-        </div>
-        <h2 class="text-3xl md:text-5xl font-bold mb-10 leading-tight reveal-header">
-            "Terror and talks cannot go together. Water and blood cannot flow together."
-        </h2>
-        <div class="grid md:grid-cols-2 gap-12">
-            <p class="text-gray-400 text-lg leading-relaxed reveal-para">
-                A granular, time-stamped chronicle serves as the factual bedrock of military history. This dossier reconstructs the intricate cause-and-effect relationship between the <span class="text-white">Pahalgam provocation</span> and India's decisive strategic response.
-            </p>
-            <div class="mono text-xs text-gray-500 border-l border-white/10 pl-6 flex flex-col gap-4 reveal-para">
-                <div>
-                    <strong class="text-white block mb-1">TARGET</strong>
-                    Terrorist Infrastructure & Leadership
-                </div>
-                <div>
-                    <strong class="text-white block mb-1">DOCTRINE</strong>
-                    Non-escalatory, precise, calibrated.
-                </div>
-                <div>
-                    <strong class="text-white block mb-1">ASSETS</strong>
-                    Made-in-India Drones, Missiles, Tri-Services.
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- THE TICK-TOCK (TIMELINE) -->
-    <section class="py-20 relative" id="timeline-section">
-        <div class="text-center mb-24">
-            <span class="mono text-red-500 text-sm tracking-widest border border-red-900/50 bg-red-900/10 px-3 py-1 rounded">THE TICK-TOCK</span>
-            <h3 class="display text-4xl mt-4">OPERATIONAL TIMELINE</h3>
-        </div>
-
-        <div class="relative max-w-5xl mx-auto">
-            <!-- The Central Line -->
-            <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-white/10 md:-translate-x-1/2 origin-top" id="timeline-line"></div>
-
-            <!-- Event 1 -->
-            <div class="timeline-event relative grid md:grid-cols-2 gap-8 mb-32 px-6">
-                <div class="md:text-right flex flex-col md:items-end">
-                    <span class="mono text-4xl font-bold text-white">2025-04-22</span>
-                    <span class="text-red-500 mono text-sm mt-1">THE PROVOCATION</span>
-                </div>
-                <div class="hidden md:flex justify-center relative">
-                    <div class="w-3 h-3 bg-red-500 rounded-full red-dot absolute top-4"></div>
-                </div>
-                <div class="card-blur p-6 rounded-lg border-l-2 border-red-500">
-                    <h4 class="text-xl font-bold mb-2">Pahalgam Terror Attack</h4>
-                    <p class="text-gray-400 text-sm mb-4">
-                        26 innocent civilians (25 Indians, 1 Nepali) killed after being segregated by religion.
-                    </p>
-                    <div class="mono text-xs text-gray-500 bg-black/50 p-3 rounded">
-                        "The barbarity displayed... shocked the entire country and the world."<br>
-                        <span class="text-white">- PM Address to Nation</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Event 2 -->
-            <div class="timeline-event relative grid md:grid-cols-2 gap-8 mb-32 px-6">
-                <div class="order-2 md:order-1 card-blur p-6 rounded-lg border-r-2 border-white/20">
-                    <h4 class="text-xl font-bold mb-2">Diplomatic & Strategic Signal</h4>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Cabinet Committee on Security (CCS) meets. UN Security Council condemns the attack in strongest terms.
-                    </p>
-                    <div class="mono text-xs text-gray-500 bg-black/50 p-3 rounded">
-                        "Important to send a clear, strong and resolute message."<br>
-                        <span class="text-white">- EAM Dr. S. Jaishankar</span>
-                    </div>
-                </div>
-                <div class="hidden md:flex justify-center relative order-2">
-                    <div class="w-3 h-3 bg-white rounded-full absolute top-4"></div>
-                </div>
-                <div class="order-1 md:order-3 md:text-left">
-                    <span class="mono text-4xl font-bold text-white">2025-04-23</span>
-                    <span class="text-gray-500 mono text-sm mt-1">TO APRIL 25</span>
-                </div>
-            </div>
-
-            <!-- Event 3 -->
-            <div class="timeline-event relative grid md:grid-cols-2 gap-8 mb-32 px-6">
-                <div class="md:text-right flex flex-col md:items-end">
-                    <span class="mono text-4xl font-bold text-green-500">2025-05-06</span>
-                    <span class="text-green-500 mono text-sm mt-1">OPERATION LAUNCH</span>
-                </div>
-                <div class="hidden md:flex justify-center relative">
-                    <div class="w-3 h-3 bg-green-500 rounded-full red-dot absolute top-4"></div>
-                </div>
-                <div class="card-blur p-6 rounded-lg border-l-2 border-green-500">
-                    <h4 class="text-xl font-bold mb-2">OPERATION SINDOOR</h4>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Indian Armed Forces conduct precision strikes against 9 terrorist infrastructure sites in Pakistan and PoK.
-                    </p>
-                    <ul class="mono text-xs text-gray-300 space-y-2">
-                        <li>> Targeted: Noor Khan, Rahimyar Khan Air Bases</li>
-                        <li>> Neutralized: Lahore Air Defence System</li>
-                        <li>> Outcome: Mission Accomplished by Sunrise 07 May</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Event 4 -->
-            <div class="timeline-event relative grid md:grid-cols-2 gap-8 mb-32 px-6">
-                <div class="order-2 md:order-1 card-blur p-6 rounded-lg border-r-2 border-orange-500">
-                    <h4 class="text-xl font-bold mb-2">Failed Retaliation</h4>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Pakistan launches ~1,000 missiles and drones targeting Indian civilian/military infra. 
-                    </p>
-                    <div class="mono text-xs text-orange-400 bg-orange-900/20 p-3 rounded mb-2">
-                        ALERT: Drone intrusions at 36 locations.
-                    </div>
-                    <p class="text-white text-sm">
-                        <strong>Result:</strong> India's air defence neutralized threats mid-air. Indian counter-strike hits back with "unimaginable intensity."
-                    </p>
-                </div>
-                <div class="hidden md:flex justify-center relative order-2">
-                    <div class="w-3 h-3 bg-orange-500 rounded-full absolute top-4"></div>
-                </div>
-                <div class="order-1 md:order-3 md:text-left">
-                    <span class="mono text-4xl font-bold text-white">2025-05-09</span>
-                    <span class="text-gray-500 mono text-sm mt-1">THE ESCALATION</span>
-                </div>
-            </div>
-
-             <!-- Event 5 -->
-             <div class="timeline-event relative grid md:grid-cols-2 gap-8 mb-32 px-6">
-                <div class="md:text-right flex flex-col md:items-end">
-                    <span class="mono text-4xl font-bold text-blue-400">2025-05-10</span>
-                    <span class="text-blue-400 mono text-sm mt-1">CESSATION</span>
-                </div>
-                <div class="hidden md:flex justify-center relative">
-                    <div class="w-3 h-3 bg-blue-400 rounded-full absolute top-4"></div>
-                </div>
-                <div class="card-blur p-6 rounded-lg border-l-2 border-blue-400">
-                    <h4 class="text-xl font-bold mb-2">Ceasefire</h4>
-                    <p class="text-gray-400 text-sm mb-4">
-                        Pakistani DGMO calls Indian DGMO. Understanding reached to stop all firing and military action.
-                    </p>
-                    <div class="mono text-xs text-gray-500 bg-black/50 p-3 rounded">
-                        "Effect from 1700 hours IST."
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ASSET REGISTER -->
-    <section class="py-20 bg-neutral-900 relative overflow-hidden">
-        <!-- Decoration -->
-        <div class="absolute top-0 right-0 p-10 opacity-10">
-            <svg width="200" height="200" viewBox="0 0 100 100" class="animate-spin-slow">
-                <path d="M50 0 L100 50 L50 100 L0 50 Z" stroke="white" fill="none" />
-            </svg>
-        </div>
-
-        <div class="px-6 max-w-7xl mx-auto">
-            <h3 class="display text-4xl mb-2">ASSET REGISTER</h3>
-            <p class="mono text-sm text-gray-500 mb-12">## DECLASSIFIED EQUIPMENT LIST</p>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Asset Card 1 -->
-                <div class="asset-card border border-white/10 p-6 bg-black/40 hover:bg-white/5 transition-colors duration-300 group">
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="mono text-xs text-green-500 border border-green-500 px-2 py-1">AERIAL</span>
-                        <svg class="w-6 h-6 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">TAPAS-BH-201</h4>
-                    <p class="text-xs text-gray-400 mono mb-4">Tactical Advanced Platform for Aerial Surveillance</p>
-                    <div class="h-px w-full bg-white/10 mb-4"></div>
-                    <ul class="text-sm text-gray-300 space-y-1">
-                        <li>+ Indigenous DRDO Tech</li>
-                        <li>+ Exposed Pak Vulnerabilities</li>
-                        <li>+ High Altitude Loiter</li>
-                    </ul>
-                </div>
-
-                <!-- Asset Card 2 -->
-                <div class="asset-card border border-white/10 p-6 bg-black/40 hover:bg-white/5 transition-colors duration-300 group">
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="mono text-xs text-green-500 border border-green-500 px-2 py-1">OFFENSIVE</span>
-                        <svg class="w-6 h-6 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">BRAHMOS</h4>
-                    <p class="text-xs text-gray-400 mono mb-4">Supersonic Cruise Missile System</p>
-                    <div class="h-px w-full bg-white/10 mb-4"></div>
-                    <ul class="text-sm text-gray-300 space-y-1">
-                        <li>+ Precision Strike</li>
-                        <li>+ Counter-Disinformation Role</li>
-                        <li>+ Tri-Service Deployment</li>
-                    </ul>
-                </div>
-
-                <!-- Asset Card 3 -->
-                <div class="asset-card border border-white/10 p-6 bg-black/40 hover:bg-white/5 transition-colors duration-300 group">
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="mono text-xs text-blue-400 border border-blue-400 px-2 py-1">DEFENCE</span>
-                        <svg class="w-6 h-6 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">S-400 TRIUMF</h4>
-                    <p class="text-xs text-gray-400 mono mb-4">Air Defence Shield</p>
-                    <div class="h-px w-full bg-white/10 mb-4"></div>
-                    <ul class="text-sm text-gray-300 space-y-1">
-                        <li>+ Layered Defence Grid</li>
-                        <li>+ Neutralized ~1000 threats</li>
-                        <li>+ Protected Adampur Base</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- VOICES (QUOTES) -->
-    <section class="py-32 px-6 relative">
-        <div class="max-w-5xl mx-auto">
-            <h2 class="display text-6xl md:text-8xl opacity-10 mb-10">VERBATIM</h2>
+        <!-- ===== HERO SECTION ===== -->
+        <section id="hero" class="h-screen w-full flex flex-col justify-center items-center relative text-center dotted-background overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950"></div>
             
-            <div class="space-y-24">
-                <div class="quote-block">
-                    <p class="text-2xl md:text-4xl leading-tight font-serif italic text-gray-200 mb-6">
-                        "If that is Pakistan’s intent, it will cost them dearly. We will respond to bullets with canons."
+            <div class="relative z-10 p-4">
+                <h1 id="hero-title" class="text-4xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter text-white opacity-0">
+                    Operation <span class="text-accent">Sindoor</span>
+                </h1>
+                <p id="hero-subtitle" class="text-lg md:text-2xl text-slate-400 mt-4 font-light max-w-3xl mx-auto opacity-0">
+                    An anatomy of the 2025 Indo-Pakistani conflict, from provocation to strategic cessation.
+                </p>
+            </div>
+
+            <div class="scroll-indicator absolute bottom-10 left-1/2 -translate-x-1/2 z-10 opacity-0" id="hero-scroll">
+                <div class="w-6 h-10 border-2 border-slate-600 rounded-full p-1">
+                    <div class="w-full h-2 bg-slate-600 rounded-full animate-pulse"></div>
+                </div>
+                <p class="text-slate-600 text-xs uppercase tracking-widest mt-2">Scroll</p>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 1: THE PROVOCATION (CONTEXT) ===== -->
+        <section class="py-24 md:py-32 w-full relative dotted-background">
+            <div class="max-w-6xl mx-auto px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center fade-in-section">
+                    <p class="text-base font-semibold uppercase tracking-wider text-accent">The Catalyst</p>
+                    <h2 class="mt-2 text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                        A Line Crossed
+                    </h2>
+                    <p class="mt-6 text-xl text-slate-400 font-light">
+                        On <span class="text-white font-medium">April 22, 2025</span>, a barbaric terror attack in Pahalgam claimed 26 innocent lives. This was not just an attack, but a "barbarity that shocked the entire country and the world."
                     </p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center font-bold">PM</div>
-                        <div>
-                            <div class="text-white font-bold">Narendra Modi</div>
-                            <div class="text-xs text-gray-500 mono">Prime Minister of India</div>
+                </div>
+
+                <div class="mt-20 max-w-5xl mx-auto text-center fade-in-section">
+                    <h3 class="text-2xl md:text-4xl font-bold text-white tracking-tight">The Resolve</h3>
+                    <p class="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+                        Following a Cabinet Committee of Security (CCS) meeting on April 23rd, the decision was made. India would send a "clear, strong and resolute message."
+                    </p>
+                    <div class="mt-8 p-8 glass-card rounded-2xl shadow-2xl">
+                        <blockquote class="text-xl md:text-2xl lg:text-3xl font-medium text-slate-200 italic">
+                            "India's stand is very clear... Terror and talks cannot go together."
+                        </blockquote>
+                        <cite class="mt-6 block text-base text-slate-400 not-italic">
+                            — Prime Minister Narendra Modi
+                        </cite>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 2: THE TIMELINE (SCROLLYTELLING) ===== -->
+        <section class="py-24 md:py-32 w-full relative">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="max-w-3xl fade-in-section">
+                    <p class="text-base font-semibold uppercase tracking-wider text-accent">The Chronology</p>
+                    <h2 class="mt-2 text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                        The 19-Day Escalation
+                    </h2>
+                    <p class="mt-6 text-xl text-slate-400 font-light">
+                        From the initial strike to the final ceasefire, a precise sequence of events unfolded, demonstrating a new doctrine of calibrated response.
+                    </p>
+                </div>
+
+                <!-- Timeline Container -->
+                <div class="mt-20 md:mt-32 flex">
+                    
+                    <!-- Left: Sticky Timeline Graphic -->
+                    <div class="w-1/4 hidden md:flex justify-center pt-4">
+                        <div class="sticky top-1/3 h-64">
+                            <div class="relative h-full w-0.5 bg-slate-800">
+                                <!-- Timeline Progress Bar (animated by GSAP) -->
+                                <div id="timeline-progress" class="absolute top-0 left-0 w-full bg-accent" style="height: 0%;"></div>
+                                
+                                <!-- Timeline Dots (static) -->
+                                <div class="timeline-dot absolute -left-1.5 top-[0%]" data-step="1"></div>
+                                <div class="timeline-dot absolute -left-1.5 top-[25%]" data-step="2"></div>
+                                <div class="timeline-dot absolute -left-1.5 top-[50%]" data-step="3"></div>
+                                <div class="timeline-dot absolute -left-1.5 top-[75%]" data-step="4"></div>
+                                <div class="timeline-dot absolute -left-1.5 top-[100%]" data-step="5"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="quote-block md:pl-20 border-l-4 border-red-600 pl-6">
-                    <p class="text-xl md:text-3xl leading-tight font-serif italic text-gray-300 mb-6">
-                        "Through Operation Sindoor, bonding between Pakistan and terrorism has been exposed to the entire world."
-                    </p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center font-bold">HM</div>
-                        <div>
-                            <div class="text-white font-bold">Amit Shah</div>
-                            <div class="text-xs text-gray-500 mono">Union Home Minister</div>
+                    <!-- Right: Scrolling Content Cards -->
+                    <div class="w-full md:w-3/4">
+                        
+                        <!-- Timeline Step 1 -->
+                        <div class="timeline-step min-h-[40vh] md:min-h-[50vh]" data-step="1">
+                            <div class="p-8 glass-card rounded-2xl shadow-2xl border-l-4 border-slate-800 transition-all duration-300">
+                                <p class="text-sm font-semibold uppercase tracking-wider text-accent">Phase 1: The Response</p>
+                                <h3 class="mt-3 text-2xl md:text-3xl font-bold text-white">May 6-7: Operation Launched</h3>
+                                <p class="mt-4 text-lg text-slate-400">
+                                    Indian Armed Forces conduct precision strikes against nine terrorist infrastructure sites. The Ministry of Defence states the action is "focused, measured and non-escalatory," targeting only terror hideouts.
+                                </p>
+                            </div>
                         </div>
+
+                        <!-- Timeline Step 2 -->
+                        <div class="timeline-step min-h-[40vh] md:min-h-[50vh]" data-step="2">
+                            <div class="p-8 glass-card rounded-2xl shadow-2xl border-l-4 border-slate-800 transition-all duration-300">
+                                <p class="text-sm font-semibold uppercase tracking-wider text-accent">Phase 2: Retaliation</p>
+                                <h3 class="mt-3 text-2xl md:text-3xl font-bold text-white">May 7-8: Failed Escalation</h3>
+                                <p class="mt-4 text-lg text-slate-400">
+                                    Pakistan launches a "failed unprovoked drone and missile attack" targeting over a dozen Indian military installations. Concurrently, Indian forces neutralize Pakistani Air Defence Radars, including one at Lahore.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Step 3 -->
+                        <div class="timeline-step min-h-[40vh] md:min-h-[50vh]" data-step="3">
+                            <div class="p-8 glass-card rounded-2xl shadow-2xl border-l-4 border-slate-800 transition-all duration-300">
+                                <p class="text-sm font-semibold uppercase tracking-wider text-accent">Phase 3: The Brink</p>
+                                <h3 class="mt-3 text-2xl md:text-3xl font-bold text-white">May 9: The 1,000-Missile Attack</h3>
+                                <p class="mt-4 text-lg text-slate-400">
+                                    Following a warning from the US Vice President, Pakistan attempts a major offensive with ~1,000 missiles and drones. India's integrated air defence "neutralized all of them mid-air."
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Step 4 -->
+                        <div class="timeline-step min-h-[40vh] md:min-h-[50vh]" data-step="4">
+                            <div class="p-8 glass-card rounded-2xl shadow-2xl border-l-4 border-slate-800 transition-all duration-300">
+                                <p class="text-sm font-semibold uppercase tracking-wider text-accent">Phase 4: The Counterstrike</p>
+                                <h3 class="mt-3 text-2xl md:text-3xl font-bold text-white">May 9-10: Decisive Response</h3>
+                                <p class="mt-4 text-lg text-slate-400">
+                                    In a powerful counter, "Indian missiles struck across Pakistan with such intensity that it surpassed their imagination." Targets include major airbases like Skardu, Sargodha, and Jacobabad.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Step 5 -->
+                        <div class="timeline-step min-h-[40vh] md:min-h-[50vh]" data-step="5">
+                            <div class="p-8 glass-card rounded-2xl shadow-2xl border-l-4 border-slate-800 transition-all duration-300">
+                                <p class="text-sm font-semibold uppercase tracking-wider text-accent">Phase 5: Cessation</p>
+                                <h3 class="mt-3 text-2xl md:text-3xl font-bold text-white">May 10 (17:00 IST): Ceasefire</h3>
+                                <p class="mt-4 text-lg text-slate-400">
+                                    The Director General of Military Operations (DGMO) of Pakistan calls his Indian counterpart. An understanding to "stop all firing and military action on land, air, and sea" comes into effect.
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- IMPACT / FOOTER -->
-    <section class="py-20 text-center border-t border-white/10 bg-black">
-        <div class="max-w-2xl mx-auto px-6">
-            <div class="mb-8">
-                <svg class="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h2 class="text-3xl font-bold mb-2">MISSION ACCOMPLISHED</h2>
-                <p class="text-gray-400 text-sm">Operation Sindoor will be remembered as a symbol of military precision and national resolve.</p>
+        <!-- ===== SECTION 3: THE ASSETS (HIGH-TECH) ===== -->
+        <section class="py-24 md:py-32 w-full relative dotted-background">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="max-w-3xl fade-in-section">
+                    <p class="text-base font-semibold uppercase tracking-wider text-accent">The Arsenal</p>
+                    <h2 class="mt-2 text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                        A Tri-Service Doctrine
+                    </h2>
+                    <p class="mt-6 text-xl text-slate-400 font-light">
+                        The operation showcased seamless synergy between the Army, Navy, and Air Force, prominently featuring indigenous 'Atmanirbhar Bharat' platforms.
+                    </p>
+                </div>
+
+                <!-- Asset Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20">
+                    
+                    <!-- Asset Card -->
+                    <div class="asset-card p-8 glass-card rounded-2xl shadow-lg hover:shadow-cyan-500/10 transition-shadow duration-300">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center">
+                            <!-- SVG for Aerial -->
+                            <svg class="w-6 h-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L6 12Zm0 0h7.5" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-2xl font-bold text-white">Aerial Dominance</h3>
+                        <p class="mt-4 text-slate-400">Made-in-India drones and missiles "exposed vulnerabilities."</p>
+                        <ul class="mt-4 space-y-2 text-slate-300">
+                            <li><strong>Drones:</strong> TAPAS-BH-201, Rustom</li>
+                            <li><strong>Loitering:</strong> Nagastra, Warmate</li>
+                            <li><strong>Aircraft:</strong> LCA Tejas, LCH Prachand</li>
+                        </ul>
+                    </div>
+
+                    <!-- Asset Card -->
+                    <div class="asset-card p-8 glass-card rounded-2xl shadow-lg hover:shadow-cyan-500/10 transition-shadow duration-300">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center">
+                            <!-- SVG for Ground -->
+                            <svg class="w-6 h-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.03 1.125 0 1.13.094 1.976 1.057 1.976 2.192V7.5M8.25 7.5h7.5M8.25 7.5v9c0 1.135.845 2.098 1.976 2.192.373.03.748.03 1.125 0 1.13-.094 1.976-1.057 1.976-2.192V7.5" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-2xl font-bold text-white">Ground & Air Defence</h3>
+                        <p class="mt-4 text-slate-400">Indigenous systems provided a multi-layered shield.</p>
+                        <ul class="mt-4 space-y-2 text-slate-300">
+                            <li><strong>Missiles:</strong> Akash (Stellar Performance)</li>
+                            <li><strong>Legacy:</strong> Pechora, OSA-AK</li>
+                            <li><strong>Artillery:</strong> Dhanush, ATAGS</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Asset Card -->
+                    <div class="asset-card p-8 glass-card rounded-2xl shadow-lg hover:shadow-cyan-500/10 transition-shadow duration-300">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center">
+                            <!-- SVG for C&C / Naval -->
+                            <svg class="w-6 h-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m3 0l3 2.25-3 2.25M6.75 12l3-2.25 3 2.25m-3 0l3 2.25 3-2.25M17.25 12l3-2.25 3 2.25m-3 0l3 2.25 3-2.25M12 21.75l3-2.25 3 2.25m-3 0l3 2.25 3-2.25" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-2xl font-bold text-white">C&C and Naval Power</h3>
+                        <p class="mt-4 text-slate-400">Network-centric capability and maritime dominance.</p>
+                        <ul class="mt-4 space-y-2 text-slate-300">
+                            <li><strong>C&C:</strong> Integrated Air Command (IACCS)</li>
+                            <li><strong>Intel:</strong> 10+ ISRO Satellites</li>
+                            <li><strong>Naval:</strong> Carrier Battle Group (CBG)</li>
+                        </ul>
+                    </div>
+
+                </div>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4 mono text-xs text-gray-600 mb-12">
-                <div>DOC ID: 2127370</div>
-                <div>CLASS: UNCLASSIFIED</div>
+        </section>
+
+        <!-- ===== SECTION 4: THE IMPACT (QUOTES) ===== -->
+        <section class="py-24 md:py-32 w-full relative">
+            <div class="max-w-6xl mx-auto px-6 lg:px-8 text-center">
+                <div class="fade-in-section">
+                    <p class="text-base font-semibold uppercase tracking-wider text-accent">The Doctrine</p>
+                    <h2 class="mt-2 text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                        A New Precedent
+                    </h2>
+                    <p class="mt-6 text-xl text-slate-400 font-light max-w-3xl mx-auto">
+                        "Operation Sindoor will be remembered as a defining moment in India's defence history—a symbol of military precision, inter-service cooperation, and national resolve."
+                    </p>
+                </div>
             </div>
 
-            <footer class="pt-10 border-t border-white/5">
-                <p class="mono text-xs text-gray-500">Made by Kuldeep Singh with ❤️</p>
-            </footer>
-        </div>
-    </section>
+            <!-- Sticky Quotes Scroller -->
+            <div id="quotes-container" class="relative h-[300vh] w-full mt-20 md:mt-32">
+                <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+                    
+                    <!-- Quote 1 -->
+                    <div class="quote-slide absolute max-w-4xl mx-auto p-6 text-center opacity-0">
+                        <blockquote class="text-2xl md:text-4xl lg:text-5xl font-bold text-white italic">
+                            "India will not tolerate any nuclear blackmail."
+                        </blockquote>
+                        <cite class="mt-8 block text-lg text-slate-400 not-italic">
+                            — Prime Minister Narendra Modi, Address to the Nation
+                        </cite>
+                    </div>
+                    
+                    <!-- Quote 2 -->
+                    <div class="quote-slide absolute max-w-4xl mx-auto p-6 text-center opacity-0">
+                        <blockquote class="text-2xl md:text-4xl lg:text-5xl font-bold text-white italic">
+                            "Operation Sindoor was the most precise and successful operation in the history of responses to terrorist attacks on our soil."
+                        </blockquote>
+                        <cite class="mt-8 block text-lg text-slate-400 not-italic">
+                            — Union Home Minister Amit Shah
+                        </cite>
+                    </div>
 
+                    <!-- Quote 3 -->
+                    <div class="quote-slide absolute max-w-4xl mx-auto p-6 text-center opacity-0">
+                        <blockquote class="text-2xl md:text-4xl lg:text-5xl font-bold text-white italic">
+                            "If that is Pakistan's intent, it will cost them dearly. We will respond to bullets with canons."
+                        </blockquote>
+                        <cite class="mt-8 block text-lg text-slate-400 not-italic">
+                            — PM Modi, recounting response to US Vice President
+                        </cite>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="w-full py-16 dotted-background">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+                <p class="text-slate-500 text-sm fade-in-section">
+                    Made by Kuldeep Singh with ❤️
+                </p>
+            </div>
+        </footer>
+
+    </div> <!-- End #main-content -->
+
+
+    <!-- GSAP Animation Script -->
     <script>
-        // Initialize Lenis for smooth scrolling
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            mouseMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Register GSAP plugins
+            gsap.registerPlugin(ScrollTrigger);
 
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
+            // --- Preloader ---
+            function initPreloader() {
+                const preloader = document.getElementById('preloader');
+                const mainContent = document.getElementById('main-content');
+                
+                window.onload = () => {
+                    gsap.to(preloader, { 
+                        opacity: 0, 
+                        duration: 0.5, 
+                        onComplete: () => preloader.style.display = 'none' 
+                    });
+                    
+                    gsap.to(mainContent, { 
+                        opacity: 1, 
+                        duration: 0.5, 
+                        delay: 0.3 
+                    });
 
-        // Register GSAP Plugins
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Loader Animation
-        window.addEventListener('load', () => {
-            const tl = gsap.timeline();
-
-            tl.to("#progress-bar", {
-                width: "100%",
-                duration: 1.5,
-                ease: "power2.inOut"
-            })
-            .to("#loader", {
-                y: "-100%",
-                duration: 1,
-                ease: "expo.inOut",
-                delay: 0.2
-            })
-            .from(".hero-title", {
-                y: 100,
-                opacity: 0,
-                duration: 1.5,
-                ease: "power4.out",
-                stagger: 0.1
-            }, "-=0.5")
-            .from("#hero-subtitle", {
-                width: 0,
-                duration: 1,
-                ease: "power2.out"
-            }, "-=1")
-            .to("#hero-meta", {
-                opacity: 1,
-                duration: 1
-            }, "-=0.5");
-        });
-
-        // Context Section Reveals
-        gsap.utils.toArray('.reveal-header').forEach(header => {
-            gsap.from(header, {
-                scrollTrigger: {
-                    trigger: header,
-                    start: "top 80%",
-                },
-                y: 50,
-                opacity: 0,
-                duration: 1,
-                ease: "power3.out"
-            });
-        });
-
-        gsap.utils.toArray('.reveal-para').forEach((para, i) => {
-            gsap.from(para, {
-                scrollTrigger: {
-                    trigger: para,
-                    start: "top 85%",
-                },
-                y: 30,
-                opacity: 0,
-                duration: 1,
-                delay: i * 0.1,
-                ease: "power3.out"
-            });
-        });
-
-        // Timeline Animation
-        // Draw line
-        gsap.from("#timeline-line", {
-            scaleY: 0,
-            duration: 1,
-            ease: "none",
-            scrollTrigger: {
-                trigger: "#timeline-section",
-                start: "top center",
-                end: "bottom center",
-                scrub: true
+                    // Start Hero animations *after* load
+                    initHeroAnimations();
+                };
             }
-        });
 
-        // Events popping in
-        gsap.utils.toArray('.timeline-event').forEach((event, i) => {
-            const content = event.querySelectorAll('div');
-            gsap.from(content, {
-                scrollTrigger: {
-                    trigger: event,
-                    start: "top 80%",
-                },
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.1,
-                ease: "back.out(1.7)"
-            });
-        });
+            // --- Hero Animations ---
+            function initHeroAnimations() {
+                gsap.to("#hero-title", { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 1, 
+                    delay: 0.5,
+                    ease: "power3.out" 
+                });
+                gsap.fromTo("#hero-title", { y: 20 }, { y: 0 }); // Subtle rise
 
-        // Asset Cards Stagger
-        gsap.from(".asset-card", {
-            scrollTrigger: {
-                trigger: ".asset-card",
-                start: "top 85%",
-            },
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power2.out"
-        });
+                gsap.to("#hero-subtitle", { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 1, 
+                    delay: 0.8,
+                    ease: "power3.out"
+                });
+                gsap.fromTo("#hero-subtitle", { y: 20 }, { y: 0 });
 
-        // Quotes Parallax
-        gsap.utils.toArray('.quote-block').forEach(quote => {
-            gsap.from(quote, {
-                scrollTrigger: {
-                    trigger: quote,
-                    start: "top 90%",
-                    scrub: 1
-                },
-                y: 100,
-                opacity: 0.5,
-                duration: 1
-            });
-        });
+                gsap.to("#hero-scroll", { 
+                    opacity: 1, 
+                    duration: 1, 
+                    delay: 1.5,
+                    ease: "power3.out"
+                });
+            }
 
+            // --- Generic Fade-in Sections ---
+            function initContentAnimations() {
+                const sections = gsap.utils.toArray('.fade-in-section');
+                sections.forEach(section => {
+                    gsap.fromTo(section, 
+                        { autoAlpha: 0, y: 50 },
+                        { 
+                            autoAlpha: 1, 
+                            y: 0, 
+                            duration: 0.8,
+                            ease: 'power3.out',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top 85%', // Starts when 85% from top hits the viewport
+                                toggleActions: 'play none none none'
+                            }
+                        }
+                    );
+                });
+            }
+
+            // --- Timeline Scrollytelling ---
+            function initTimelineScroll() {
+                const steps = gsap.utils.toArray('.timeline-step');
+                const timelineProgress = document.getElementById('timeline-progress');
+                const dots = gsap.utils.toArray('.timeline-dot');
+
+                steps.forEach((step, index) => {
+                    const stepCard = step.querySelector('.glass-card');
+                    
+                    // Animate card highlight and timeline bar
+                    ScrollTrigger.create({
+                        trigger: step,
+                        start: 'top 50%', // When top of step hits center
+                        end: 'bottom 50%', // When bottom of step hits center
+                        onEnter: () => {
+                            gsap.to(stepCard, { 
+                                borderColor: '#2dd4bf', // teal-400
+                                boxShadow: '0 10px 15px -3px rgba(45, 212, 191, 0.1), 0 4px 6px -4px rgba(45, 212, 191, 0.1)',
+                                duration: 0.3
+                            });
+                            // Animate progress bar
+                            gsap.to(timelineProgress, { 
+                                height: `${(index + 1) / steps.length * 100}%`,
+                                duration: 0.4,
+                                ease: 'power2.out'
+                            });
+                            // Highlight dot
+                            dots.forEach(dot => {
+                                if (parseInt(dot.dataset.step) === (index + 1)) {
+                                    gsap.to(dot, { backgroundColor: '#2dd4bf', scale: 1.8, duration: 0.3 });
+                                } else {
+                                    gsap.to(dot, { backgroundColor: 'transparent', scale: 1, duration: 0.3 });
+                                }
+                            });
+                        },
+                        onLeave: () => {
+                            gsap.to(stepCard, { 
+                                borderColor: '#1e293b', // slate-800
+                                boxShadow: 'none',
+                                duration: 0.3
+                            });
+                        },
+                        onLeaveBack: () => {
+                             gsap.to(stepCard, { 
+                                borderColor: '#1e293b', // slate-800
+                                boxShadow: 'none',
+                                duration: 0.3
+                            });
+                            // Animate progress bar back
+                             gsap.to(timelineProgress, { 
+                                height: `${index / steps.length * 100}%`,
+                                duration: 0.4,
+                                ease: 'power2.out'
+                            });
+                            // Highlight previous dot
+                            dots.forEach(dot => {
+                                if (parseInt(dot.dataset.step) === index) {
+                                    gsap.to(dot, { backgroundColor: '#2dd4bf', scale: 1.8, duration: 0.3 });
+                                } else {
+                                    gsap.to(dot, { backgroundColor: 'transparent', scale: 1, duration: 0.3 });
+                                }
+                            });
+                        }
+                    });
+                });
+
+                // Style the dots
+                gsap.set('.timeline-dot', {
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    border: '2px solid #2dd4bf', // teal-400
+                    backgroundColor: 'transparent',
+                    transformOrigin: 'center center'
+                });
+            }
+
+            // --- Asset Grid Stagger ---
+            function initAssetGrid() {
+                gsap.fromTo('.asset-card', 
+                    { autoAlpha: 0, y: 50 },
+                    {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: 'power3.out',
+                        stagger: 0.15, // This makes them animate in one by one
+                        scrollTrigger: {
+                            trigger: '.asset-card',
+                            start: 'top 85%',
+                            toggleActions: 'play none none none'
+                        }
+                    }
+                );
+            }
+
+            // --- Sticky Quotes Scroller ---
+            function initQuoteScroll() {
+                const quotesContainer = document.getElementById('quotes-container');
+                const quotes = gsap.utils.toArray('.quote-slide');
+                
+                // Pin the main container
+                const pin = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: quotesContainer,
+                        pin: true,
+                        scrub: 1, // Smooth scrubbing
+                        start: 'top top',
+                        end: '+=2000' // Pin for 2000px of scroll
+                    }
+                });
+
+                // Animate quotes in and out
+                const totalQuotes = quotes.length;
+                const segment = 1 / totalQuotes;
+
+                quotes.forEach((quote, index) => {
+                    // Fade in
+                    pin.fromTo(quote, 
+                        { autoAlpha: 0, y: 30 }, 
+                        { autoAlpha: 1, y: 0, duration: segment / 2 },
+                        index * segment // Start time
+                    );
+                    
+                    // Fade out (if not the last quote)
+                    if (index < totalQuotes - 1) {
+                        pin.to(quote, 
+                            { autoAlpha: 0, y: -30, duration: segment / 2 },
+                            (index + 1) * segment - (segment / 2) // Start time
+                        );
+                    }
+                });
+            }
+
+            // --- Initialize All Animations ---
+            initPreloader();
+            initContentAnimations();
+            initTimelineScroll();
+            initAssetGrid();
+            initQuoteScroll();
+
+        });
     </script>
+
 </body>
 </html>
