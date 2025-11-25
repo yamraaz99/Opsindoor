@@ -3,797 +3,1540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operation Sindoor: Anatomy of a New Doctrine</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
+    <title>Operation Sindoor | A Chronicle of Precision & Resolve</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- GSAP + ScrollTrigger -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        'heading': ['Space Grotesk', 'sans-serif'],
-                        'body': ['Inter', 'sans-serif'],
-                    },
                     colors: {
-                        'deep-black': '#0a0a0a',
-                        'slate-gray': '#1e293b',
-                        'target-green': '#22c55e',
-                        'alert-red': '#ef4444',
+                        'sindoor': {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        },
+                        'military': {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                            600: '#242430',
+                            500: '#2e2e3a',
+                        }
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
                     }
                 }
             }
         }
     </script>
-    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body {
-            background: #0a0a0a;
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        /* Radar Pulse Animation */
-        @keyframes radar-pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.4;
-            }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
         }
-        
-        .radar-circle {
-            position: absolute;
-            border: 2px solid #22c55e;
-            border-radius: 50%;
-            animation: radar-pulse 3s ease-in-out infinite;
+
+        ::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 3px;
         }
-        
-        .radar-circle:nth-child(1) {
-            width: 200px;
-            height: 200px;
-            animation-delay: 0s;
-        }
-        
-        .radar-circle:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            animation-delay: 0.5s;
-        }
-        
-        .radar-circle:nth-child(3) {
-            width: 400px;
-            height: 400px;
-            animation-delay: 1s;
-        }
-        
-        /* Glassmorphism Cards */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        
-        .glass-card:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(34, 197, 94, 0.3);
-        }
-        
-        /* Map Background States */
-        .map-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: 0;
-            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            background: radial-gradient(ellipse at center, #1e293b 0%, #0a0a0a 100%);
-        }
-        
-        .map-background.state-0 {
-            background: radial-gradient(ellipse at 65% 45%, rgba(239, 68, 68, 0.15) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-1 {
-            background: radial-gradient(ellipse at 50% 50%, rgba(251, 191, 36, 0.12) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-2 {
-            background: radial-gradient(ellipse at 40% 40%, rgba(34, 197, 94, 0.15) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-3 {
-            background: radial-gradient(ellipse at 60% 50%, rgba(239, 68, 68, 0.2) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-4 {
-            background: radial-gradient(ellipse at 45% 55%, rgba(34, 197, 94, 0.12) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-5 {
-            background: radial-gradient(ellipse at 50% 30%, rgba(239, 68, 68, 0.25) 0%, #0a0a0a 55%);
-        }
-        
-        .map-background.state-6 {
-            background: radial-gradient(ellipse at 55% 45%, rgba(34, 197, 94, 0.18) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-7 {
-            background: radial-gradient(ellipse at 50% 50%, rgba(251, 191, 36, 0.15) 0%, #0a0a0a 60%);
-        }
-        
-        .map-background.state-8 {
-            background: radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.12) 0%, #0a0a0a 65%);
-        }
-        
-        .map-background.state-9 {
-            background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.2) 0%, #0a0a0a 50%);
-        }
-        
-        /* Bento Grid Hover */
-        .bento-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            transition: all 0.3s ease-out;
-        }
-        
-        .bento-card:hover {
-            border-color: #22c55e;
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
-            transform: translateY(-4px);
-        }
-        
-        /* Beating Heart */
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            10%, 30% { transform: scale(1.2); }
-            20%, 40% { transform: scale(1); }
-        }
-        
-        .heart-beat {
-            display: inline-block;
-            animation: heartbeat 2s ease-in-out infinite;
-        }
-        
-        /* Smooth Scroll */
+
         html {
             scroll-behavior: smooth;
         }
-        
-        /* Label Typography */
-        .label-caps {
-            font-family: 'Space Grotesk', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 600;
-            font-size: 0.75rem;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #f5f5f5;
+            overflow-x: hidden;
         }
-        
-        /* Timeline Indicator */
+
+        .grain {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            width: 200%;
+            height: 200%;
+            background: transparent url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E") repeat;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .hero-bg {
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 70%),
+                linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+        }
+
+        .grid-overlay {
+            background-image: 
+                linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(249, 115, 22, 0.1) 30deg, transparent 60deg);
+            animation: radar 4s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes radar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .radar-rings {
+            position: absolute;
+            border: 1px solid rgba(249, 115, 22, 0.1);
+            border-radius: 50%;
+        }
+
+        .text-reveal {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .line-reveal {
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(100%);
+        }
+
+        .word {
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .timeline-line {
+            background: linear-gradient(180deg, transparent, #f97316, #f97316, transparent);
+        }
+
         .timeline-dot {
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.3);
+        }
+
+        .timeline-dot::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 50%;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .asset-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .asset-card:hover {
+            border-color: rgba(249, 115, 22, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 60px rgba(249, 115, 22, 0.1);
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .asset-card:hover::before {
+            opacity: 1;
+        }
+
+        .quote-mark {
+            font-family: 'Playfair Display', serif;
+            font-size: 8rem;
+            line-height: 1;
+            color: rgba(249, 115, 22, 0.2);
+        }
+
+        .stat-counter {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-number {
+            font-size: 12rem;
+            font-weight: 900;
+            color: rgba(249, 115, 22, 0.05);
+            position: absolute;
+            left: -2rem;
+            top: -4rem;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .crosshair {
+            position: relative;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(249, 115, 22, 0.3);
+        }
+
+        .crosshair::before {
+            width: 1px;
+            height: 20px;
+            left: 50%;
+            top: -30px;
+        }
+
+        .crosshair::after {
+            width: 20px;
+            height: 1px;
+            left: -30px;
+            top: 50%;
+        }
+
+        .map-marker {
+            position: absolute;
             width: 12px;
             height: 12px;
-            background: #22c55e;
+            background: #f97316;
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .map-marker::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border: 2px solid rgba(249, 115, 22, 0.4);
+            border-radius: 50%;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .target-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.6), transparent);
+            transform-origin: left center;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 12vw, 10rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 0.9;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #f97316 50%, #ea580c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .scroll-indicator {
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .horizontal-scroll-container {
+            display: flex;
+            flex-wrap: nowrap;
+            width: max-content;
+        }
+
+        .horizontal-panel {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .reveal-mask {
+            overflow: hidden;
+        }
+
+        .reveal-content {
+            transform: translateY(100%);
+        }
+
+        .parallax-layer {
+            will-change: transform;
+        }
+
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #f97316;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-1 3s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #3b82f6;
+            clip: rect(24px, 450px, 36px, 0);
+            animation: glitch-2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { clip: rect(44px, 450px, 56px, 0); }
+            20% { clip: rect(12px, 450px, 38px, 0); }
+            40% { clip: rect(78px, 450px, 92px, 0); }
+            60% { clip: rect(32px, 450px, 48px, 0); }
+            80% { clip: rect(56px, 450px, 74px, 0); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { clip: rect(24px, 450px, 36px, 0); }
+            20% { clip: rect(62px, 450px, 84px, 0); }
+            40% { clip: rect(8px, 450px, 22px, 0); }
+            60% { clip: rect(48px, 450px, 62px, 0); }
+            80% { clip: rect(88px, 450px, 96px, 0); }
+        }
+
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: #f97316;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            transform: translateX(0);
+        }
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0f;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #f97316, #ea580c);
+            transition: width 0.3s ease;
+        }
+
+        .topo-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 10 C 20 10, 10 30, 10 50 C 10 70, 30 90, 50 90 C 70 90, 90 70, 90 50 C 90 30, 80 10, 50 10' fill='none' stroke='rgba(249,115,22,0.05)' stroke-width='0.5'/%3E%3Cpath d='M50 20 C 30 20, 20 35, 20 50 C 20 65, 35 80, 50 80 C 65 80, 80 65, 80 50 C 80 35, 70 20, 50 20' fill='none' stroke='rgba(249,115,22,0.05)' stroke-width='0.5'/%3E%3Cpath d='M50 30 C 40 30, 30 40, 30 50 C 30 60, 40 70, 50 70 C 60 70, 70 60, 70 50 C 70 40, 60 30, 50 30' fill='none' stroke='rgba(249,115,22,0.05)' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        .impact-stat {
+            position: relative;
+        }
+
+        .impact-stat::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: #f97316;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: clamp(2.5rem, 15vw, 5rem);
+            }
+            
+            .section-number {
+                font-size: 6rem;
+                left: -1rem;
+                top: -2rem;
+            }
+            
+            .quote-mark {
+                font-size: 4rem;
+            }
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(60px);
+        }
+
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(40px);
         }
     </style>
 </head>
 <body>
-
-<!-- ============================================ -->
-<!-- SECTION 1: THE CINEMATIC OPENER -->
-<!-- ============================================ -->
-<section id="opener" class="relative w-full h-screen flex items-center justify-center overflow-hidden bg-deep-black">
-    <div class="absolute inset-0 flex items-center justify-center">
-        <div class="radar-circle"></div>
-        <div class="radar-circle"></div>
-        <div class="radar-circle"></div>
-        <div class="absolute w-4 h-4 bg-target-green rounded-full shadow-lg shadow-target-green/50"></div>
-    </div>
+    <!-- Grain Overlay -->
+    <div class="grain"></div>
     
-    <div class="relative z-10 text-center px-6">
-        <h1 class="font-heading text-6xl md:text-8xl font-bold tracking-tight mb-6 text-white">
-            OPERATION SINDOOR
-        </h1>
-        <p class="font-heading text-xl md:text-3xl text-gray-400 tracking-wider mb-12">
-            84 Hours. Precision. Retribution.
-        </p>
-        <button onclick="document.getElementById('timeline-section').scrollIntoView({behavior: 'smooth'})" 
-                class="group px-8 py-4 bg-transparent border-2 border-target-green text-target-green font-heading uppercase tracking-widest hover:bg-target-green hover:text-black transition-all duration-300">
-            Start Briefing
-            <i data-lucide="chevron-down" class="inline-block w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform"></i>
-        </button>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loader">
+        <div class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium">Initializing</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <div class="text-white/40 text-xs mt-4 tracking-widest">OPERATION SINDOOR</div>
     </div>
-</section>
 
-<!-- ============================================ -->
-<!-- SECTION 2: THE STICKY GLOBAL THEATER -->
-<!-- ============================================ -->
-<section id="timeline-section" class="relative">
-    <!-- Fixed Background Map -->
-    <div id="map-background" class="map-background"></div>
-    
-    <!-- Scrolling Content -->
-    <div class="relative z-10">
-        <!-- Event 0: The Pahalgam Massacre -->
-        <div class="timeline-card min-h-screen flex items-center justify-end px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-alert-red">April 22, 2025</span>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 py-6 px-8 md:px-16" id="mainNav">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="#f97316" stroke-width="1.5"/>
+                    <circle cx="20" cy="20" r="12" stroke="#f97316" stroke-width="1"/>
+                    <circle cx="20" cy="20" r="6" stroke="#f97316" stroke-width="0.5"/>
+                    <line x1="20" y1="0" x2="20" y2="40" stroke="#f97316" stroke-width="0.5"/>
+                    <line x1="0" y1="20" x2="40" y2="20" stroke="#f97316" stroke-width="0.5"/>
+                </svg>
+                <span class="text-sm font-semibold tracking-[0.2em] uppercase text-white/80">OPS</span>
+            </div>
+            <div class="hidden md:flex items-center gap-10">
+                <a href="#context" class="nav-link text-sm text-white/60 hover:text-white transition-colors duration-300">Context</a>
+                <a href="#timeline" class="nav-link text-sm text-white/60 hover:text-white transition-colors duration-300">Timeline</a>
+                <a href="#assets" class="nav-link text-sm text-white/60 hover:text-white transition-colors duration-300">Assets</a>
+                <a href="#voices" class="nav-link text-sm text-white/60 hover:text-white transition-colors duration-300">Voices</a>
+                <a href="#impact" class="nav-link text-sm text-white/60 hover:text-white transition-colors duration-300">Impact</a>
+            </div>
+            <div class="text-xs text-white/40 tracking-[0.2em] uppercase hidden lg:block">May 2025</div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen hero-bg grid-overlay flex items-center justify-center overflow-hidden" id="hero">
+        <!-- Radar Animation -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div class="radar-sweep"></div>
+            <div class="radar-rings" style="width: 200px; height: 200px; left: -100px; top: -100px;"></div>
+            <div class="radar-rings" style="width: 350px; height: 350px; left: -175px; top: -175px;"></div>
+            <div class="radar-rings" style="width: 500px; height: 500px; left: -250px; top: -250px;"></div>
+        </div>
+
+        <!-- Floating Particles -->
+        <div class="absolute inset-0 pointer-events-none" id="particles"></div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 text-center px-6 max-w-6xl mx-auto">
+            <div class="mb-8 fade-in-up">
+                <span class="inline-block px-4 py-2 border border-sindoor-500/30 text-sindoor-500 text-xs tracking-[0.4em] uppercase rounded-full">
+                    Declassified • May 2025
+                </span>
+            </div>
+            
+            <h1 class="hero-title mb-6" id="heroTitle">
+                <span class="block text-white">OPERATION</span>
+                <span class="block gradient-text">SINDOOR</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-12 fade-in-up font-light leading-relaxed">
+                A precision counter-terror operation that redefined India's doctrine against state-sponsored terrorism
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-8 text-center fade-in-up">
+                <div>
+                    <div class="text-4xl font-bold text-white" id="counter1">9</div>
+                    <div class="text-xs text-white/40 tracking-widest uppercase mt-1">Targets Neutralized</div>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Pahalgam Massacre</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    In a barbaric act, Pakistan-based terrorists from "The Resistance Front" (TRF) murder 26 innocent tourists in Pahalgam after identifying them by religion. The attack shocks the nation and serves as the catalyst for India's decisive military response.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    <span>Jammu & Kashmir, Pahalgam</span>
+                <div class="w-px h-16 bg-white/10 hidden md:block"></div>
+                <div>
+                    <div class="text-4xl font-bold text-white" id="counter2">100+</div>
+                    <div class="text-xs text-white/40 tracking-widest uppercase mt-1">Terrorists Eliminated</div>
+                </div>
+                <div class="w-px h-16 bg-white/10 hidden md:block"></div>
+                <div>
+                    <div class="text-4xl font-bold text-white" id="counter3">0</div>
+                    <div class="text-xs text-white/40 tracking-widest uppercase mt-1">Civilian Casualties</div>
                 </div>
             </div>
         </div>
 
-        <!-- Event 1: The Diplomatic Strike -->
-        <div class="timeline-card min-h-screen flex items-center justify-start px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-yellow-500">April 23, 2025</span>
-                </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Diplomatic Strike</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    India's Cabinet Committee on Security convenes an emergency meeting. They immediately suspend the Indus Water Treaty, close a key border post, and take multiple diplomatic actions against Pakistan, signaling that this time, the response will be different.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="flag" class="w-4 h-4"></i>
-                    <span>Attari Border & Indus River</span>
-                </div>
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 scroll-indicator">
+            <div class="flex flex-col items-center gap-3">
+                <span class="text-xs text-white/40 tracking-[0.3em] uppercase">Scroll</span>
+                <svg class="w-5 h-8 text-sindoor-500" viewBox="0 0 20 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="1" y="1" width="18" height="30" rx="9" />
+                    <circle cx="10" cy="10" r="3" fill="currentColor">
+                        <animate attributeName="cy" values="10;20;10" dur="1.5s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
             </div>
         </div>
 
-        <!-- Event 2: Operation Sindoor Begins -->
-        <div class="timeline-card min-h-screen flex items-center justify-end px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-target-green">May 7, 2025 (Early Morning)</span>
-                </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Operation Sindoor Begins</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Indian forces launch 'Operation Sindoor', a series of precise, non-escalatory strikes. In just 22 minutes, they target nine key terrorist infrastructure sites deep inside Pakistan and Pakistan-occupied Kashmir without crossing the Line of Control.
-                </p>
-                <div class="grid grid-cols-2 gap-4 mt-6">
-                    <div class="border-l-2 border-target-green pl-4">
-                        <p class="label-caps text-gray-500 text-xs">Duration</p>
-                        <p class="font-heading text-2xl text-target-green">22 min</p>
+        <!-- Corner Decorations -->
+        <div class="absolute top-20 left-8 md:left-16 text-white/10 text-xs tracking-widest">
+            <div>LAT 33.7782°N</div>
+            <div>LON 76.5762°E</div>
+        </div>
+        <div class="absolute bottom-20 right-8 md:right-16 text-white/10 text-xs tracking-widest text-right">
+            <div>CLASSIFIED</div>
+            <div>LEVEL: ALPHA</div>
+        </div>
+    </section>
+
+    <!-- Context Section: The Provocation -->
+    <section class="relative min-h-screen py-32 px-6 md:px-16 overflow-hidden" id="context">
+        <div class="absolute inset-0 topo-pattern opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto relative">
+            <span class="section-number">01</span>
+            
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="relative">
+                    <div class="mb-8 fade-in-up">
+                        <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium">April 22, 2025</span>
                     </div>
-                    <div class="border-l-2 border-target-green pl-4">
-                        <p class="label-caps text-gray-500 text-xs">Targets</p>
-                        <p class="font-heading text-2xl text-target-green">9 Sites</p>
+                    
+                    <h2 class="text-4xl md:text-6xl font-bold mb-8 fade-in-up">
+                        <span class="text-white">The</span><br>
+                        <span class="gradient-text">Provocation</span>
+                    </h2>
+                    
+                    <div class="space-y-6 text-white/60 text-lg leading-relaxed fade-in-up">
+                        <p>In the serene valley of <span class="text-white font-medium">Pahalgam</span>, a barbaric terror attack shook the conscience of the world. <span class="text-sindoor-500 font-bold">26 innocent civilians</span>—25 Indians and 1 Nepali—were murdered in cold blood after being segregated by religion.</p>
+                        
+                        <p>The Resistance Front (TRF), an offshoot of the Pakistan-based Lashkar-e-Taiba, claimed responsibility within hours—not once, but twice.</p>
+                    </div>
+
+                    <div class="mt-12 p-8 bg-white/5 border-l-2 border-sindoor-500 fade-in-up">
+                        <p class="text-white/80 italic font-serif text-xl leading-relaxed">
+                            "The barbarity displayed by terrorists in Pahalgam on April 22 had shocked the entire country and the world."
+                        </p>
+                        <p class="mt-4 text-sindoor-500 text-sm tracking-widest uppercase">— Prime Minister Narendra Modi</p>
+                    </div>
+                </div>
+
+                <div class="relative fade-in-up">
+                    <!-- Stylized Map/Visualization -->
+                    <div class="aspect-square relative">
+                        <svg viewBox="0 0 400 400" class="w-full h-full">
+                            <!-- Background Grid -->
+                            <defs>
+                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(249,115,22,0.1)" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect width="400" height="400" fill="url(#grid)"/>
+                            
+                            <!-- Kashmir Region Outline (Simplified) -->
+                            <path d="M 100 150 Q 120 100 180 80 Q 250 60 300 100 Q 340 150 320 220 Q 300 280 250 300 Q 180 320 140 280 Q 100 240 100 150 Z" 
+                                  fill="none" 
+                                  stroke="rgba(249,115,22,0.3)" 
+                                  stroke-width="2"
+                                  stroke-dasharray="5,5"/>
+                            
+                            <!-- Pahalgam Marker -->
+                            <g transform="translate(200, 180)">
+                                <circle r="30" fill="rgba(249,115,22,0.1)" class="animate-ping" style="animation-duration: 2s;"/>
+                                <circle r="20" fill="rgba(249,115,22,0.2)"/>
+                                <circle r="8" fill="#f97316"/>
+                                <text y="50" text-anchor="middle" fill="white" font-size="12" font-weight="600">PAHALGAM</text>
+                                <text y="65" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10">33.7782°N, 75.3125°E</text>
+                            </g>
+
+                            <!-- Crosshairs -->
+                            <line x1="0" y1="200" x2="400" y2="200" stroke="rgba(249,115,22,0.1)" stroke-width="0.5" stroke-dasharray="10,5"/>
+                            <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(249,115,22,0.1)" stroke-width="0.5" stroke-dasharray="10,5"/>
+                        </svg>
+
+                        <!-- Data Overlay -->
+                        <div class="absolute top-4 left-4 text-xs text-white/40 space-y-1">
+                            <div>ATTACK VECTOR: TERROR</div>
+                            <div>CASUALTIES: 26</div>
+                            <div>STATUS: CONFIRMED</div>
+                        </div>
+                        
+                        <div class="absolute bottom-4 right-4 text-xs text-sindoor-500 space-y-1 text-right">
+                            <div>TRF CLAIMED</div>
+                            <div>WITHIN HOURS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Decision -->
+            <div class="mt-32 grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-3 mb-8">
+                    <h3 class="text-3xl md:text-4xl font-bold text-white fade-in-up">The Decision</h3>
+                </div>
+                
+                <div class="asset-card p-8 rounded-2xl relative stagger-item">
+                    <div class="text-sindoor-500 text-xs tracking-[0.3em] uppercase mb-4">April 23, 2025</div>
+                    <h4 class="text-xl font-bold text-white mb-4">Cabinet Security Committee</h4>
+                    <p class="text-white/50">The CCS convenes to determine India's response. A clear, strong, and resolute message was deemed essential.</p>
+                </div>
+
+                <div class="asset-card p-8 rounded-2xl relative stagger-item">
+                    <div class="text-sindoor-500 text-xs tracking-[0.3em] uppercase mb-4">April 25, 2025</div>
+                    <h4 class="text-xl font-bold text-white mb-4">UN Condemnation</h4>
+                    <p class="text-white/50">The UN Security Council issues a statement condemning the Pahalgam attack "in the strongest terms."</p>
+                </div>
+
+                <div class="asset-card p-8 rounded-2xl relative stagger-item">
+                    <div class="text-sindoor-500 text-xs tracking-[0.3em] uppercase mb-4">May 6-7, 2025</div>
+                    <h4 class="text-xl font-bold text-white mb-4">Operation Launched</h4>
+                    <p class="text-white/50">Operation Sindoor commences. Indian Armed Forces conduct precision strikes against nine terrorist infrastructure sites.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="relative py-32 overflow-hidden bg-military-800" id="timeline">
+        <div class="absolute inset-0">
+            <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sindoor-500/30 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sindoor-500/30 to-transparent"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 md:px-16 relative">
+            <span class="section-number">02</span>
+            
+            <div class="text-center mb-20">
+                <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium fade-in-up">Chronological Matrix</span>
+                <h2 class="text-4xl md:text-6xl font-bold mt-4 text-white fade-in-up">The Timeline</h2>
+                <p class="text-white/50 mt-6 max-w-2xl mx-auto fade-in-up">A granular, time-stamped chronicle from provocation to cessation</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative">
+                <!-- Central Line -->
+                <div class="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-sindoor-500/50 via-sindoor-500 to-sindoor-500/50 transform md:-translate-x-1/2"></div>
+
+                <!-- Timeline Events -->
+                <div class="space-y-16">
+                    <!-- Event 1 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12 text-right">
+                            <div class="fade-in-up">
+                                <span class="text-sindoor-500 text-sm font-mono">APR 22, 2025</span>
+                                <h4 class="text-xl font-bold text-white mt-2">Pahalgam Terror Attack</h4>
+                                <p class="text-white/50 mt-2">26 civilians massacred. TRF claims responsibility twice within hours.</p>
+                            </div>
+                        </div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-sindoor-500 rounded-full timeline-dot relative"></div>
+                        </div>
+                        <div class="md:hidden pl-20">
+                            <span class="text-sindoor-500 text-sm font-mono">APR 22, 2025</span>
+                            <h4 class="text-xl font-bold text-white mt-2">Pahalgam Terror Attack</h4>
+                            <p class="text-white/50 mt-2">26 civilians massacred. TRF claims responsibility twice within hours.</p>
+                        </div>
+                        <div class="hidden md:block w-1/2 pl-12"></div>
+                    </div>
+
+                    <!-- Event 2 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12"></div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-sindoor-500 rounded-full timeline-dot relative"></div>
+                        </div>
+                        <div class="pl-20 md:pl-12 md:w-1/2">
+                            <div class="fade-in-up">
+                                <span class="text-sindoor-500 text-sm font-mono">MAY 6-7, 2025 | 00:00 HRS</span>
+                                <h4 class="text-xl font-bold text-white mt-2">Operation Sindoor Launched</h4>
+                                <p class="text-white/50 mt-2">Precision strikes against 9 terrorist infrastructure sites in Pakistan and PoJK.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event 3 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12 text-right">
+                            <div class="fade-in-up">
+                                <span class="text-sindoor-500 text-sm font-mono">MAY 7, 2025 | 07:00 HRS</span>
+                                <h4 class="text-xl font-bold text-white mt-2">Mission Accomplished</h4>
+                                <p class="text-white/50 mt-2">By sunrise, Indian Army confirms initial mission objectives achieved.</p>
+                            </div>
+                        </div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-sindoor-500 rounded-full timeline-dot relative"></div>
+                        </div>
+                        <div class="md:hidden pl-20">
+                            <span class="text-sindoor-500 text-sm font-mono">MAY 7, 2025 | 07:00 HRS</span>
+                            <h4 class="text-xl font-bold text-white mt-2">Mission Accomplished</h4>
+                            <p class="text-white/50 mt-2">By sunrise, Indian Army confirms initial mission objectives achieved.</p>
+                        </div>
+                        <div class="hidden md:block w-1/2 pl-12"></div>
+                    </div>
+
+                    <!-- Event 4 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12"></div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-red-500 rounded-full timeline-dot relative" style="box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);"></div>
+                        </div>
+                        <div class="pl-20 md:pl-12 md:w-1/2">
+                            <div class="fade-in-up">
+                                <span class="text-red-500 text-sm font-mono">MAY 7-9, 2025</span>
+                                <h4 class="text-xl font-bold text-white mt-2">Pakistan's Failed Retaliation</h4>
+                                <p class="text-white/50 mt-2">~1000 missiles and drones launched. India's air defence neutralizes all threats mid-air.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event 5 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12 text-right">
+                            <div class="fade-in-up">
+                                <span class="text-sindoor-500 text-sm font-mono">MAY 9-10, 2025</span>
+                                <h4 class="text-xl font-bold text-white mt-2">India's Counterstrike</h4>
+                                <p class="text-white/50 mt-2">Indian missiles strike military infrastructure across Pakistan with unprecedented intensity.</p>
+                            </div>
+                        </div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-sindoor-500 rounded-full timeline-dot relative"></div>
+                        </div>
+                        <div class="md:hidden pl-20">
+                            <span class="text-sindoor-500 text-sm font-mono">MAY 9-10, 2025</span>
+                            <h4 class="text-xl font-bold text-white mt-2">India's Counterstrike</h4>
+                            <p class="text-white/50 mt-2">Indian missiles strike military infrastructure across Pakistan with unprecedented intensity.</p>
+                        </div>
+                        <div class="hidden md:block w-1/2 pl-12"></div>
+                    </div>
+
+                    <!-- Event 6 -->
+                    <div class="relative flex items-start md:items-center timeline-event">
+                        <div class="hidden md:block w-1/2 pr-12"></div>
+                        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-10">
+                            <div class="w-4 h-4 bg-green-500 rounded-full timeline-dot relative" style="box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);"></div>
+                        </div>
+                        <div class="pl-20 md:pl-12 md:w-1/2">
+                            <div class="fade-in-up">
+                                <span class="text-green-500 text-sm font-mono">MAY 10, 2025 | 17:00 HRS</span>
+                                <h4 class="text-xl font-bold text-white mt-2">Ceasefire Established</h4>
+                                <p class="text-white/50 mt-2">DGMO talks conclude. All firing and military action on land, air, and sea ceases.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Event 3: Pakistan Retaliates -->
-        <div class="timeline-card min-h-screen flex items-center justify-start px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-alert-red">May 7-8, 2025 (Overnight)</span>
+    <!-- Assets Section -->
+    <section class="relative py-32 px-6 md:px-16 bg-military-900" id="assets">
+        <div class="max-w-7xl mx-auto relative">
+            <span class="section-number">03</span>
+            
+            <div class="text-center mb-20">
+                <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium fade-in-up">The Arsenal</span>
+                <h2 class="text-4xl md:text-6xl font-bold mt-4 text-white fade-in-up">Deployed Assets</h2>
+                <p class="text-white/50 mt-6 max-w-2xl mx-auto fade-in-up">Indigenous Made-in-India systems that demonstrated Atmanirbhar Bharat's military capabilities</p>
+            </div>
+
+            <!-- Asset Categories -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <!-- Air Domain -->
+                <div class="asset-card p-8 rounded-2xl relative stagger-item group">
+                    <div class="w-16 h-16 mb-6 relative">
+                        <svg viewBox="0 0 64 64" class="w-full h-full text-sindoor-500">
+                            <path d="M32 8 L38 20 L52 24 L42 34 L44 48 L32 42 L20 48 L22 34 L12 24 L26 20 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="32" cy="32" r="6" fill="currentColor" opacity="0.3"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Aerial Systems</h4>
+                    <ul class="text-white/50 text-sm space-y-2">
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Swarm Drones
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Loitering Munitions
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            TAPAS-BH-201
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            LCA Tejas
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            LCH Prachand
+                        </li>
+                    </ul>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Pakistan Retaliates</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Considering the strikes on terrorists as an attack on itself, Pakistan launches retaliatory drone and missile attacks. They target over a dozen Indian military installations across the Northern and Western fronts, escalating the conflict.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="crosshair" class="w-4 h-4"></i>
-                    <span>Srinagar, Pathankot, Bhuj</span>
+
+                <!-- Ground Domain -->
+                <div class="asset-card p-8 rounded-2xl relative stagger-item group">
+                    <div class="w-16 h-16 mb-6 relative">
+                        <svg viewBox="0 0 64 64" class="w-full h-full text-sindoor-500">
+                            <rect x="8" y="28" width="48" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 28 L24 12 L40 12 L48 28" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="16" cy="48" r="4" fill="currentColor"/>
+                            <circle cx="32" cy="48" r="4" fill="currentColor"/>
+                            <circle cx="48" cy="48" r="4" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Ground Systems</h4>
+                    <ul class="text-white/50 text-sm space-y-2">
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            BrahMos Missiles
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Akash SAM System
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            ATAGS Artillery
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            MBT Arjun
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Dhanush Guns
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Naval Domain -->
+                <div class="asset-card p-8 rounded-2xl relative stagger-item group">
+                    <div class="w-16 h-16 mb-6 relative">
+                        <svg viewBox="0 0 64 64" class="w-full h-full text-sindoor-500">
+                            <path d="M8 36 L12 28 L52 28 L56 36 L52 44 L12 44 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M28 28 L28 18 L36 18 L36 28" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <line x1="32" y1="18" x2="32" y2="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M4 48 Q32 56 60 48" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Naval Assets</h4>
+                    <ul class="text-white/50 text-sm space-y-2">
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Carrier Battle Group
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            MiG-29K Jets
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Indigenous Destroyers
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Submarines
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Frigates & Corvettes
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- C2 Systems -->
+                <div class="asset-card p-8 rounded-2xl relative stagger-item group">
+                    <div class="w-16 h-16 mb-6 relative">
+                        <svg viewBox="0 0 64 64" class="w-full h-full text-sindoor-500">
+                            <circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="32" cy="32" r="12" fill="none" stroke="currentColor" stroke-width="1"/>
+                            <circle cx="32" cy="32" r="4" fill="currentColor"/>
+                            <line x1="32" y1="8" x2="32" y2="16" stroke="currentColor" stroke-width="2"/>
+                            <line x1="32" y1="48" x2="32" y2="56" stroke="currentColor" stroke-width="2"/>
+                            <line x1="8" y1="32" x2="16" y2="32" stroke="currentColor" stroke-width="2"/>
+                            <line x1="48" y1="32" x2="56" y2="32" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">C2 Systems</h4>
+                    <ul class="text-white/50 text-sm space-y-2">
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            Counter-UAS Grid
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            IACCS
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            S-400 System
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            ISRO Satellites (10+)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1 h-1 bg-sindoor-500 rounded-full"></span>
+                            DCN Network
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Highlighted Achievement -->
+            <div class="bg-gradient-to-r from-sindoor-500/10 via-sindoor-500/5 to-transparent p-8 md:p-12 rounded-2xl border border-sindoor-500/20 fade-in-up">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="flex-shrink-0">
+                        <div class="w-24 h-24 rounded-full bg-sindoor-500/20 flex items-center justify-center">
+                            <svg class="w-12 h-12 text-sindoor-500" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M24 4 L28 18 L42 22 L30 30 L32 44 L24 38 L16 44 L18 30 L6 22 L20 18 Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-bold text-white mb-3">Atmanirbhar Bharat Validated</h4>
+                        <p class="text-white/60 leading-relaxed">Made-in-India drones and missiles "exposed vulnerabilities in Pakistan's weapons systems." The stellar performance of indigenous platforms like the Akash SAM system and integrated Counter-UAS grid demonstrated that India's self-reliance in defence manufacturing has achieved operational readiness at the highest level.</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Event 4: The AD Systems Respond -->
-        <div class="timeline-card min-h-screen flex items-center justify-end px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-target-green">May 8, 2025 (Morning)</span>
+    <!-- Targets Section -->
+    <section class="relative py-32 px-6 md:px-16 bg-military-800 overflow-hidden" id="targets">
+        <div class="max-w-7xl mx-auto relative">
+            <span class="section-number">04</span>
+            
+            <div class="grid lg:grid-cols-2 gap-16">
+                <div>
+                    <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium fade-in-up">Precision Strikes</span>
+                    <h2 class="text-4xl md:text-5xl font-bold mt-4 text-white fade-in-up">Targets Neutralized</h2>
+                    <p class="text-white/50 mt-6 fade-in-up">Nine terrorist infrastructure sites surgically eliminated across Pakistan and PoJK</p>
+
+                    <!-- Target List -->
+                    <div class="mt-12 space-y-4">
+                        <div class="p-4 bg-white/5 border-l-2 border-red-500 stagger-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-white">Bahawalpur</h5>
+                                    <p class="text-white/40 text-sm">Jaish-e-Mohammad HQ — "University of Global Terrorism"</p>
+                                </div>
+                                <span class="text-red-500 text-xs tracking-widest">DESTROYED</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white/5 border-l-2 border-red-500 stagger-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-white">Muridke</h5>
+                                    <p class="text-white/40 text-sm">Lashkar-e-Taiba Complex</p>
+                                </div>
+                                <span class="text-red-500 text-xs tracking-widest">DESTROYED</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white/5 border-l-2 border-sindoor-500 stagger-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-white">Lahore AD System</h5>
+                                    <p class="text-white/40 text-sm">Air Defence Installation</p>
+                                </div>
+                                <span class="text-sindoor-500 text-xs tracking-widest">NEUTRALIZED</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white/5 border-l-2 border-sindoor-500 stagger-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-white">Skardu Air Base</h5>
+                                    <p class="text-white/40 text-sm">Military Aviation Facility</p>
+                                </div>
+                                <span class="text-sindoor-500 text-xs tracking-widest">EXTENSIVE DAMAGE</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white/5 border-l-2 border-sindoor-500 stagger-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-white">Sargodha Air Base</h5>
+                                    <p class="text-white/40 text-sm">Military Aviation Facility</p>
+                                </div>
+                                <span class="text-sindoor-500 text-xs tracking-widest">EXTENSIVE DAMAGE</span>
+                            </div>
+                        </div>
+
+                        <div class="text-white/30 text-sm mt-6 pl-4 border-l border-white/10">
+                            + Jacobabad, Bulari, Noor Khan, Rahimyar Khan Air Bases & multiple radar sites
+                        </div>
+                    </div>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The AD Systems Respond</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Having successfully neutralized Pakistan's initial assault with a robust air defence grid, Indian forces conduct a swift counter-strike. They target and neutralize a key Pakistani Air Defence system in Lahore.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="shield" class="w-4 h-4"></i>
-                    <span>Lahore, Pakistan</span>
+
+                <!-- Strategic Map Visualization -->
+                <div class="relative fade-in-up">
+                    <div class="aspect-square relative bg-military-700/50 rounded-2xl overflow-hidden">
+                        <svg viewBox="0 0 400 400" class="w-full h-full">
+                            <!-- Grid -->
+                            <defs>
+                                <pattern id="targetGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(249,115,22,0.08)" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect width="400" height="400" fill="url(#targetGrid)"/>
+                            
+                            <!-- Pakistan Outline (Simplified) -->
+                            <path d="M 50 100 Q 100 60 180 80 Q 260 90 300 140 Q 340 200 320 280 Q 280 340 200 360 Q 120 360 80 300 Q 40 240 50 180 Q 50 140 50 100 Z" 
+                                  fill="rgba(239, 68, 68, 0.05)" 
+                                  stroke="rgba(239, 68, 68, 0.3)" 
+                                  stroke-width="1"/>
+                            
+                            <!-- Target Markers with Labels -->
+                            <g class="target-marker" style="animation: pulse 2s ease-in-out infinite;">
+                                <circle cx="180" cy="300" r="8" fill="#ef4444"/>
+                                <circle cx="180" cy="300" r="16" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.5"/>
+                                <text x="200" y="305" fill="white" font-size="10">Bahawalpur</text>
+                            </g>
+
+                            <g class="target-marker" style="animation: pulse 2s ease-in-out infinite 0.3s;">
+                                <circle cx="140" cy="180" r="8" fill="#ef4444"/>
+                                <circle cx="140" cy="180" r="16" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.5"/>
+                                <text x="100" y="170" fill="white" font-size="10">Muridke</text>
+                            </g>
+
+                            <g class="target-marker" style="animation: pulse 2s ease-in-out infinite 0.6s;">
+                                <circle cx="130" cy="200" r="6" fill="#f97316"/>
+                                <text x="85" y="215" fill="white" font-size="10">Lahore</text>
+                            </g>
+
+                            <g class="target-marker" style="animation: pulse 2s ease-in-out infinite 0.9s;">
+                                <circle cx="260" cy="120" r="6" fill="#f97316"/>
+                                <text x="275" y="125" fill="white" font-size="10">Skardu</text>
+                            </g>
+
+                            <g class="target-marker" style="animation: pulse 2s ease-in-out infinite 1.2s;">
+                                <circle cx="200" cy="200" r="6" fill="#f97316"/>
+                                <text x="215" y="205" fill="white" font-size="10">Sargodha</text>
+                            </g>
+
+                            <!-- Strike Lines -->
+                            <line x1="350" y1="150" x2="180" y2="300" stroke="rgba(249,115,22,0.3)" stroke-width="1" stroke-dasharray="5,5"/>
+                            <line x1="350" y1="180" x2="140" y2="180" stroke="rgba(249,115,22,0.3)" stroke-width="1" stroke-dasharray="5,5"/>
+                            <line x1="350" y1="120" x2="260" y2="120" stroke="rgba(249,115,22,0.3)" stroke-width="1" stroke-dasharray="5,5"/>
+
+                            <!-- India Arrow -->
+                            <text x="360" y="150" fill="#f97316" font-size="12" font-weight="bold">INDIA →</text>
+                        </svg>
+
+                        <!-- Overlay Data -->
+                        <div class="absolute top-4 left-4 text-xs space-y-1">
+                            <div class="text-sindoor-500">OPERATION SINDOOR</div>
+                            <div class="text-white/40">STRIKE PATTERN</div>
+                        </div>
+
+                        <div class="absolute bottom-4 right-4 flex items-center gap-4 text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                <span class="text-white/60">Terror Sites</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 bg-sindoor-500 rounded-full"></span>
+                                <span class="text-white/60">Military</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Event 5: The Drone Swarm -->
-        <div class="timeline-card min-h-screen flex items-center justify-start px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-alert-red">May 8-9, 2025 (Overnight)</span>
+    <!-- Voices Section -->
+    <section class="relative py-32 px-6 md:px-16 bg-military-900" id="voices">
+        <div class="max-w-7xl mx-auto relative">
+            <span class="section-number">05</span>
+            
+            <div class="text-center mb-20">
+                <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium fade-in-up">The Voices</span>
+                <h2 class="text-4xl md:text-6xl font-bold mt-4 text-white fade-in-up">Words of Resolve</h2>
+            </div>
+
+            <!-- Quote Cards -->
+            <div class="space-y-12">
+                <!-- Warning -->
+                <div class="relative p-8 md:p-12 bg-gradient-to-br from-red-500/10 to-transparent rounded-2xl border border-red-500/20 fade-in-up">
+                    <span class="quote-mark absolute -top-4 left-8">"</span>
+                    <div class="ml-0 md:ml-16">
+                        <span class="text-red-500 text-xs tracking-[0.3em] uppercase mb-4 block">Warning</span>
+                        <blockquote class="text-xl md:text-3xl font-serif text-white leading-relaxed italic">
+                            India will not tolerate any nuclear blackmail. India will strike precisely and decisively at the terrorist hideouts developing under the cover of nuclear blackmail.
+                        </blockquote>
+                        <div class="mt-6 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white font-bold">NM</div>
+                            <div>
+                                <div class="text-white font-semibold">Prime Minister Narendra Modi</div>
+                                <div class="text-white/40 text-sm">Address to the Nation, May 12, 2025</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Drone Swarm</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Pakistan dramatically escalates with a massive aerial intrusion, launching 300-400 drones along the entire border from Leh to Sir Creek. India's multi-layered defence systems engage and destroy numerous threats, gathering crucial intelligence from the wreckage.
-                </p>
-                <div class="border-l-2 border-alert-red pl-4">
-                    <p class="label-caps text-gray-500 text-xs">Threat Level</p>
-                    <p class="font-heading text-3xl text-alert-red">300-400 Drones</p>
+
+                <!-- Execution -->
+                <div class="relative p-8 md:p-12 bg-gradient-to-br from-blue-500/10 to-transparent rounded-2xl border border-blue-500/20 fade-in-up">
+                    <span class="quote-mark absolute -top-4 left-8" style="color: rgba(59, 130, 246, 0.2);">"</span>
+                    <div class="ml-0 md:ml-16">
+                        <span class="text-blue-500 text-xs tracking-[0.3em] uppercase mb-4 block">Execution</span>
+                        <blockquote class="text-xl md:text-3xl font-serif text-white leading-relaxed italic">
+                            Our actions have been focused, measured and non-escalatory in nature. No Pakistani military facilities have been targeted. India has demonstrated considerable restraint in selection of targets and method of execution.
+                        </blockquote>
+                        <div class="mt-6 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white font-bold">MoD</div>
+                            <div>
+                                <div class="text-white font-semibold">Ministry of Defence</div>
+                                <div class="text-white/40 text-sm">Press Release, May 7, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Victory -->
+                <div class="relative p-8 md:p-12 bg-gradient-to-br from-sindoor-500/10 to-transparent rounded-2xl border border-sindoor-500/20 fade-in-up">
+                    <span class="quote-mark absolute -top-4 left-8">"</span>
+                    <div class="ml-0 md:ml-16">
+                        <span class="text-sindoor-500 text-xs tracking-[0.3em] uppercase mb-4 block">Victory</span>
+                        <blockquote class="text-xl md:text-3xl font-serif text-white leading-relaxed italic">
+                            Operation Sindoor was the most precise and successful operation in the history of responses to terrorist attacks on our soil, fulfilling all its objectives.
+                        </blockquote>
+                        <div class="mt-6 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white font-bold">AS</div>
+                            <div>
+                                <div class="text-white font-semibold">Union Home Minister Amit Shah</div>
+                                <div class="text-white/40 text-sm">BSF Investiture Ceremony, May 23, 2025</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Event 6: The Decisive Response -->
-        <div class="timeline-card min-h-screen flex items-center justify-end px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-target-green">May 9-10, 2025 (Overnight)</span>
+    <!-- Impact Section -->
+    <section class="relative py-32 px-6 md:px-16 bg-military-800" id="impact">
+        <div class="max-w-7xl mx-auto relative">
+            <span class="section-number">06</span>
+            
+            <div class="text-center mb-20">
+                <span class="text-sindoor-500 text-sm tracking-[0.3em] uppercase font-medium fade-in-up">The Aftermath</span>
+                <h2 class="text-4xl md:text-6xl font-bold mt-4 text-white fade-in-up">Strategic Impact</h2>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+                <div class="text-center p-8 fade-in-up">
+                    <div class="stat-counter text-6xl md:text-7xl font-black mb-4" data-value="9">0</div>
+                    <div class="text-white/60 uppercase tracking-widest text-sm">Terror Sites<br>Destroyed</div>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Decisive Response</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Following a warning from the U.S. of a massive impending attack, India unleashes a devastating counter-offensive. Indian missiles strike military targets across Pakistan with overwhelming force, crippling key airbases and infrastructure.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="zap" class="w-4 h-4"></i>
-                    <span>Skardu, Sargodha, Jacobabad</span>
+                <div class="text-center p-8 fade-in-up">
+                    <div class="stat-counter text-6xl md:text-7xl font-black mb-4" data-value="100">0</div>
+                    <div class="text-white/60 uppercase tracking-widest text-sm">Terrorists<br>Eliminated</div>
+                </div>
+                <div class="text-center p-8 fade-in-up">
+                    <div class="stat-counter text-6xl md:text-7xl font-black mb-4" data-value="1000">0</div>
+                    <div class="text-white/60 uppercase tracking-widest text-sm">Enemy Projectiles<br>Neutralized</div>
+                </div>
+                <div class="text-center p-8 fade-in-up">
+                    <div class="stat-counter text-6xl md:text-7xl font-black mb-4" data-value="0">0</div>
+                    <div class="text-white/60 uppercase tracking-widest text-sm">Civilian<br>Casualties</div>
+                </div>
+            </div>
+
+            <!-- Key Outcomes -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="asset-card p-8 rounded-2xl stagger-item">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-white mb-2">International Recognition</h4>
+                            <p class="text-white/50">On July 18, 2025, the United States designated TRF as a Foreign Terrorist Organisation (FTO) and Specially Designated Global Terrorist (SDGT).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-card p-8 rounded-2xl stagger-item">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-white mb-2">UN Acknowledgment</h4>
+                            <p class="text-white/50">TRF mentioned in the latest report of UNSC 1267 Sanctions Committee Monitoring Team, published July 29, 2025.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-card p-8 rounded-2xl stagger-item">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-sindoor-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-sindoor-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-white mb-2">Doctrine Established</h4>
+                            <p class="text-white/50">"Terror and talks cannot go together. Terror and trade cannot go together. Water and blood cannot flow together."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-card p-8 rounded-2xl stagger-item">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-sindoor-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-sindoor-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-white mb-2">Self-Reliance Proven</h4>
+                            <p class="text-white/50">Made-in-India systems demonstrated operational superiority, validating Atmanirbhar Bharat's defence capabilities.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Event 7: The Call for De-escalation -->
-        <div class="timeline-card min-h-screen flex items-center justify-start px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-yellow-500">May 10, 2025 (1535 Hours)</span>
-                </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Call for De-escalation</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    Unable to endure further assault, Pakistan's Director General of Military Operations (DGMO) makes a direct call to his Indian counterpart. He formally requests a cessation of all firing and military activities.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="phone" class="w-4 h-4"></i>
-                    <span>New Delhi ↔ Islamabad</span>
-                </div>
+    <!-- Closing Statement -->
+    <section class="relative py-32 px-6 md:px-16 bg-military-900 overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 bg-gradient-to-t from-sindoor-500/10 to-transparent"></div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <blockquote class="text-2xl md:text-4xl font-serif text-white leading-relaxed italic fade-in-up">
+                "Operation Sindoor will be remembered as a defining moment in India's defence history—a symbol of military precision, inter-service cooperation, and national resolve."
+            </blockquote>
+            <div class="mt-8 text-sindoor-500 text-sm tracking-widest uppercase fade-in-up">
+                Ministry of Information & Broadcasting, May 18, 2025
             </div>
         </div>
+    </section>
 
-        <!-- Event 8: The Guns Fall Silent -->
-        <div class="timeline-card min-h-screen flex items-center justify-end px-6 md:px-12 py-20">
-            <div class="glass-card max-w-2xl p-8 md:p-12 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-blue-400">May 10, 2025 (1700 Hours)</span>
+    <!-- Footer -->
+    <footer class="relative py-16 px-6 md:px-16 bg-black border-t border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="#f97316" stroke-width="1.5"/>
+                        <circle cx="20" cy="20" r="12" stroke="#f97316" stroke-width="1"/>
+                        <circle cx="20" cy="20" r="6" stroke="#f97316" stroke-width="0.5"/>
+                        <line x1="20" y1="0" x2="20" y2="40" stroke="#f97316" stroke-width="0.5"/>
+                        <line x1="0" y1="20" x2="40" y2="20" stroke="#f97316" stroke-width="0.5"/>
+                    </svg>
+                    <span class="text-sm font-semibold tracking-[0.2em] uppercase text-white/80">OPERATION SINDOOR</span>
                 </div>
-                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">The Guns Fall Silent</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-6">
-                    A mutual understanding to halt all military action on land, air, and sea comes into effect. While the active conflict is paused, India makes it clear that its broader operation against terror is not over.
-                </p>
-                <div class="flex items-center gap-2 text-sm text-gray-500 label-caps">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i>
-                    <span>Ceasefire Active</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Event 9: A New Doctrine -->
-        <div class="timeline-card min-h-screen flex items-center justify-center px-6 md:px-12 py-20">
-            <div class="glass-card max-w-3xl p-8 md:p-12 rounded-lg text-center">
-                <div class="flex items-center justify-center gap-3 mb-4">
-                    <div class="timeline-dot"></div>
-                    <span class="label-caps text-target-green">July 29, 2025</span>
-                </div>
-                <h2 class="font-heading text-5xl md:text-6xl font-bold mb-6">A New Doctrine</h2>
-                <p class="font-body text-gray-300 text-lg leading-relaxed mb-8">
-                    Prime Minister Modi addresses the Indian Parliament, declaring that Operation Sindoor has established a new doctrine against terror. He affirms that the operation remains active and any future aggression will be met with a formidable retaliation.
-                </p>
-                <div class="inline-block px-6 py-3 bg-target-green/10 border border-target-green rounded">
-                    <p class="font-heading text-xl text-target-green uppercase tracking-wide">
-                        India's Doctrine of Punitive Deterrence
+                
+                <div class="text-center">
+                    <p class="text-white/40 text-sm">
+                        Made by <span class="text-sindoor-500 font-medium">Kuldeep Singh</span> with <span class="text-red-500">❤️</span>
                     </p>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- ============================================ -->
-<!-- SECTION 3: THE ARSENAL BENTO GRID -->
-<!-- ============================================ -->
-<section id="arsenal" class="relative z-10 bg-deep-black px-6 md:px-12 py-24">
-    <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="font-heading text-5xl md:text-6xl font-bold mb-4">THE AATMANIRBHAR ARSENAL</h2>
-            <p class="label-caps text-gray-500">Indigenous Assets That Defined the Operation</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto">
-            <!-- Arsenal Item 1: Akash -->
-            <div class="bento-card p-6 rounded-lg md:col-span-2">
-                <div class="flex items-start gap-4">
-                    <div class="p-3 bg-target-green/10 rounded-lg">
-                        <i data-lucide="rocket" class="w-8 h-8 text-target-green"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-heading text-2xl font-bold mb-2">Akash Missile System</h3>
-                        <p class="label-caps text-xs text-gray-500 mb-3">Short-Range Surface-to-Air Missile</p>
-                        <p class="text-gray-400 text-sm mb-4">Served as a key component of India's layered air defence, demonstrating stellar performance in neutralizing Pakistani drones and missiles.</p>
-                        <div class="inline-block px-3 py-1 bg-deep-black rounded text-xs text-target-green label-caps">
-                            Multi-Target Engagement
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Arsenal Item 2: Drones -->
-            <div class="bento-card p-6 rounded-lg">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="plane" class="w-8 h-8 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-xl font-bold mb-2">Made-in-India Drones</h3>
-                <p class="label-caps text-xs text-gray-500 mb-3">Loitering Munitions</p>
-                <p class="text-gray-400 text-sm">Executed offensive strikes against key Pakistani airbases with surgical precision.</p>
-            </div>
-
-            <!-- Arsenal Item 3: LCA Tejas -->
-            <div class="bento-card p-6 rounded-lg">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="plane-takeoff" class="w-8 h-8 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-xl font-bold mb-2">LCA Tejas</h3>
-                <p class="label-caps text-xs text-gray-500 mb-3">Supersonic Multi-role Fighter</p>
-                <p class="text-gray-400 text-sm">Represented the cutting-edge of India's indigenous defence manufacturing.</p>
-            </div>
-
-            <!-- Arsenal Item 4: ALH Dhruv -->
-            <div class="bento-card p-6 rounded-lg md:col-span-2">
-                <div class="flex items-start gap-4">
-                    <div class="p-3 bg-target-green/10 rounded-lg">
-                        <i data-lucide="send" class="w-8 h-8 text-target-green"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-heading text-2xl font-bold mb-2">Advanced Light Helicopter (ALH) Dhruv</h3>
-                        <p class="label-caps text-xs text-gray-500 mb-3">Multi-role Utility Helicopter</p>
-                        <p class="text-gray-400 text-sm">Provided crucial logistical support and mobility, showcasing the versatility of India's homegrown aviation assets.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Arsenal Item 5: DCN -->
-            <div class="bento-card p-6 rounded-lg md:col-span-2 md:row-span-2">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="network" class="w-10 h-10 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-3xl font-bold mb-3">Defence Communication Network</h3>
-                <p class="label-caps text-xs text-gray-500 mb-4">Tri-Service Secure Network</p>
-                <p class="text-gray-400 mb-6 leading-relaxed">Served as the digital backbone for joint operations, enabling seamless and secure communication between the Army, Navy, and Air Force for integrated planning and execution.</p>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="text-center p-3 bg-deep-black rounded">
-                        <p class="label-caps text-xs text-gray-500">Army</p>
-                        <i data-lucide="shield" class="w-6 h-6 text-target-green mx-auto mt-2"></i>
-                    </div>
-                    <div class="text-center p-3 bg-deep-black rounded">
-                        <p class="label-caps text-xs text-gray-500">Navy</p>
-                        <i data-lucide="anchor" class="w-6 h-6 text-target-green mx-auto mt-2"></i>
-                    </div>
-                    <div class="text-center p-3 bg-deep-black rounded">
-                        <p class="label-caps text-xs text-gray-500">Air Force</p>
-                        <i data-lucide="plane" class="w-6 h-6 text-target-green mx-auto mt-2"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Arsenal Item 6: Carrier Battle Group -->
-            <div class="bento-card p-6 rounded-lg">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="anchor" class="w-8 h-8 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-xl font-bold mb-2">Carrier Battle Group</h3>
-                <p class="label-caps text-xs text-gray-500 mb-3">Naval Task Force</p>
-                <p class="text-gray-400 text-sm">Asserted maritime dominance and provided air defence shield.</p>
-            </div>
-
-            <!-- Arsenal Item 7: IACCS -->
-            <div class="bento-card p-6 rounded-lg md:col-span-2">
-                <div class="flex items-start gap-4">
-                    <div class="p-3 bg-target-green/10 rounded-lg">
-                        <i data-lucide="radar" class="w-8 h-8 text-target-green"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-heading text-2xl font-bold mb-2">Integrated Air Command & Control System</h3>
-                        <p class="label-caps text-xs text-gray-500 mb-3">Network-Centric Command</p>
-                        <p class="text-gray-400 text-sm">Integrated all air defence assets enabling real-time threat identification and interception.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Arsenal Item 8: Legacy Systems -->
-            <div class="bento-card p-6 rounded-lg">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="zap" class="w-8 h-8 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-xl font-bold mb-2">Pechora / OSA-AK</h3>
-                <p class="label-caps text-xs text-gray-500 mb-3">Legacy Air Defence</p>
-                <p class="text-gray-400 text-sm">Battle-proven point and low-level air defence weapons.</p>
-            </div>
-
-            <!-- Arsenal Item 9: BSF -->
-            <div class="bento-card p-6 rounded-lg">
-                <div class="p-3 bg-target-green/10 rounded-lg mb-4 w-fit">
-                    <i data-lucide="shield-alert" class="w-8 h-8 text-target-green"></i>
-                </div>
-                <h3 class="font-heading text-xl font-bold mb-2">Border Security Force</h3>
-                <p class="label-caps text-xs text-gray-500 mb-3">First Line of Defence</p>
-                <p class="text-gray-400 text-sm">Thwarted major infiltration attempt in Samba district.</p>
-            </div>
-
-            <!-- Arsenal Item 10: ISRO Satellites -->
-            <div class="bento-card p-6 rounded-lg md:col-span-2">
-                <div class="flex items-start gap-4">
-                    <div class="p-3 bg-target-green/10 rounded-lg">
-                        <i data-lucide="satellite" class="w-8 h-8 text-target-green"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-heading text-2xl font-bold mb-2">ISRO Satellites</h3>
-                        <p class="label-caps text-xs text-gray-500 mb-3">Strategic Surveillance Assets</p>
-                        <p class="text-gray-400 text-sm mb-4">At least 10 satellites working round-the-clock for strategic purposes, providing continuous monitoring of borders and seashore areas.</p>
-                        <div class="inline-block px-3 py-1 bg-deep-black rounded text-xs text-target-green label-caps">
-                            24/7 Coverage
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================ -->
-<!-- SECTION 4: BY THE NUMBERS -->
-<!-- ============================================ -->
-<section id="numbers" class="relative z-10 bg-slate-gray px-6 md:px-12 py-24">
-    <div class="max-w-5xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="font-heading text-5xl md:text-6xl font-bold mb-4">BY THE NUMBERS</h2>
-            <p class="label-caps text-gray-400">The Tactical & Human Cost</p>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            <div class="text-center p-6 bg-deep-black rounded-lg border border-gray-800">
-                <p class="font-heading text-4xl text-target-green mb-2">3.5</p>
-                <p class="label-caps text-xs text-gray-500">Days of Active Conflict</p>
-            </div>
-            <div class="text-center p-6 bg-deep-black rounded-lg border border-gray-800">
-                <p class="font-heading text-4xl text-target-green mb-2">9</p>
-                <p class="label-caps text-xs text-gray-500">Terror Sites Neutralized</p>
-            </div>
-            <div class="text-center p-6 bg-deep-black rounded-lg border border-gray-800">
-                <p class="font-heading text-4xl text-target-green mb-2">100+</p>
-                <p class="label-caps text-xs text-gray-500">Terrorists Eliminated</p>
-            </div>
-            <div class="text-center p-6 bg-deep-black rounded-lg border border-gray-800">
-                <p class="font-heading text-4xl text-target-green mb-2">0</p>
-                <p class="label-caps text-xs text-gray-500">Civilian Deaths (Indian Strikes)</p>
-            </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="p-6 bg-deep-black rounded-lg border border-alert-red">
-                <p class="label-caps text-xs text-alert-red mb-3">Pakistani Retaliation Impact</p>
-                <div class="flex items-end gap-6">
-                    <div>
-                        <p class="font-heading text-5xl text-alert-red">16</p>
-                        <p class="text-sm text-gray-400">Civilians Killed</p>
-                    </div>
-                    <div>
-                        <p class="font-heading text-5xl text-alert-red">59</p>
-                        <p class="text-sm text-gray-400">Injured</p>
-                    </div>
+                <div class="text-white/30 text-xs tracking-widest">
+                    MAY 2025 • INDIA
                 </div>
             </div>
             
-            <div class="p-6 bg-deep-black rounded-lg border border-target-green">
-                <p class="label-caps text-xs text-target-green mb-3">Key Targets</p>
-                <ul class="space-y-2 text-gray-400">
-                    <li class="flex items-center gap-2">
-                        <i data-lucide="crosshair" class="w-4 h-4 text-target-green"></i>
-                        <span>Bahawalpur HQ</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <i data-lucide="crosshair" class="w-4 h-4 text-target-green"></i>
-                        <span>Muridke HQ</span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <i data-lucide="crosshair" class="w-4 h-4 text-target-green"></i>
-                        <span>4 Major Airbases</span>
-                    </li>
-                </ul>
+            <div class="mt-12 pt-8 border-t border-white/5 text-center">
+                <p class="text-white/20 text-xs max-w-2xl mx-auto leading-relaxed">
+                    This is a documentary visualization based on official government sources and press releases. 
+                    All information presented is derived from publicly available records.
+                </p>
             </div>
         </div>
-    </div>
-</section>
+    </footer>
 
-<!-- ============================================ -->
-<!-- SECTION 5: THE STRATEGIC DEBRIEF -->
-<!-- ============================================ -->
-<section id="debrief" class="relative z-10 bg-deep-black px-6 md:px-12 py-24">
-    <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="font-heading text-5xl md:text-7xl font-bold mb-6">THE DOCTRINE SHIFT</h2>
-            <p class="label-caps text-target-green mb-8">A New Normal</p>
-        </div>
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Loading Screen
+        const loader = document.getElementById('loader');
+        const loadingProgress = document.getElementById('loadingProgress');
         
-        <div class="prose prose-invert prose-lg max-w-none mb-16">
-            <p class="text-gray-300 text-xl leading-relaxed mb-6">
-                Operation Sindoor was India's strategic response to the barbaric April 22nd Pahalgam Attack, where terrorists murdered 26 civilians. The operation's core purpose was to shift from a policy of strategic restraint to one of active <span class="text-target-green font-bold">Punitive Deterrence</span>.
-            </p>
-            <p class="text-gray-300 text-xl leading-relaxed">
-                By striking deep into Pakistan at terror hubs like Bahawalpur and Muridke, India demonstrated its resolve to impose a heavy cost for any future attacks, reject nuclear blackmail, and hold state sponsors of terror directly accountable for their actions.
-            </p>
-        </div>
-
-        <div class="border-l-4 border-target-green pl-8 py-6 bg-slate-gray/30 rounded-r-lg">
-            <p class="font-heading text-3xl md:text-4xl text-gray-200 leading-relaxed italic mb-4">
-                "Operation Sindoor has established a new doctrine against terror. The operation remains active and any future aggression will be met with formidable retaliation."
-            </p>
-            <p class="label-caps text-sm text-gray-500">— Prime Minister Narendra Modi, July 29, 2025</p>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================ -->
-<!-- FOOTER -->
-<!-- ============================================ -->
-<footer class="relative z-10 bg-deep-black border-t border-gray-800 px-6 py-12">
-    <div class="max-w-4xl mx-auto text-center">
-        <p class="label-caps text-gray-500 mb-4">Visual Investigation by</p>
-        <p class="font-heading text-2xl text-white mb-6">WorldFocusIndia</p>
-        <p class="text-gray-600 text-sm">
-            Made by Kuldeep Singh with <span class="heart-beat text-alert-red">❤️</span>
-        </p>
-    </div>
-</footer>
-
-<!-- ============================================ -->
-<!-- SCRIPTS -->
-<!-- ============================================ -->
-<script>
-    // Initialize Lucide Icons
-    lucide.createIcons();
-    
-    // GSAP ScrollTrigger Setup
-    gsap.registerPlugin(ScrollTrigger);
-    
-    // Get all timeline cards
-    const timelineCards = document.querySelectorAll('.timeline-card');
-    const mapBackground = document.getElementById('map-background');
-    
-    // Create scroll-triggered animations for each timeline card
-    timelineCards.forEach((card, index) => {
-        ScrollTrigger.create({
-            trigger: card,
-            start: 'top center',
-            end: 'bottom center',
-            onEnter: () => {
-                // Remove all state classes
-                mapBackground.className = 'map-background';
-                // Add current state class
-                mapBackground.classList.add(`state-${index}`);
-            },
-            onEnterBack: () => {
-                // Remove all state classes
-                mapBackground.className = 'map-background';
-                // Add current state class
-                mapBackground.classList.add(`state-${index}`);
-            },
-        });
-        
-        // Animate the card itself
-        gsap.from(card.querySelector('.glass-card'), {
-            scrollTrigger: {
-                trigger: card,
-                start: 'top 80%',
-                end: 'top 20%',
-                toggleActions: 'play none none reverse'
-            },
-            opacity: 0,
-            y: 100,
-            duration: 1,
-            ease: 'power3.out'
-        });
-    });
-    
-    // Animate arsenal cards on scroll
-    const bentoCards = document.querySelectorAll('.bento-card');
-    bentoCards.forEach((card, index) => {
-        gsap.from(card, {
-            scrollTrigger: {
-                trigger: card,
-                start: 'top 90%',
-                toggleActions: 'play none none reverse'
-            },
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power3.out'
-        });
-    });
-    
-    // Parallax effect for opener radar
-    gsap.to('#opener .radar-circle', {
-        scrollTrigger: {
-            trigger: '#opener',
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 1
-        },
-        scale: 2,
-        opacity: 0
-    });
-    
-    // Stats counter animation
-    const statsSection = document.getElementById('numbers');
-    const statNumbers = statsSection.querySelectorAll('.font-heading.text-4xl, .font-heading.text-5xl');
-    
-    statNumbers.forEach(stat => {
-        const text = stat.textContent;
-        const hasPlus = text.includes('+');
-        const number = parseInt(text);
-        
-        if (!isNaN(number)) {
-            ScrollTrigger.create({
-                trigger: stat,
-                start: 'top 80%',
-                onEnter: () => {
-                    let current = 0;
-                    const increment = number / 50;
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= number) {
-                            stat.textContent = hasPlus ? `${number}+` : number;
-                            clearInterval(timer);
-                        } else {
-                            stat.textContent = Math.floor(current);
+        let progress = 0;
+        const loadingInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                loadingProgress.style.width = '100%';
+                clearInterval(loadingInterval);
+                
+                setTimeout(() => {
+                    gsap.to(loader, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            loader.style.display = 'none';
+                            initAnimations();
                         }
-                    }, 30);
+                    });
+                }, 300);
+            } else {
+                loadingProgress.style.width = progress + '%';
+            }
+        }, 100);
+
+        // Main Animation Init
+        function initAnimations() {
+            // Hero Title Animation
+            gsap.from('#heroTitle', {
+                y: 100,
+                opacity: 0,
+                duration: 1.5,
+                ease: 'power4.out'
+            });
+
+            // Fade in up elements
+            gsap.utils.toArray('.fade-in-up').forEach((el, i) => {
+                gsap.to(el, {
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    y: 0,
+                    opacity: 1,
+                    duration: 1,
+                    ease: 'power3.out',
+                    delay: i * 0.1
+                });
+            });
+
+            // Stagger items
+            gsap.utils.toArray('.stagger-item').forEach((el, i) => {
+                gsap.to(el, {
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    delay: i * 0.1
+                });
+            });
+
+            // Timeline events
+            gsap.utils.toArray('.timeline-event').forEach((event) => {
+                gsap.from(event.querySelector('.fade-in-up'), {
+                    scrollTrigger: {
+                        trigger: event,
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    x: event.querySelector('.text-right') ? 50 : -50,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: 'power3.out'
+                });
+            });
+
+            // Counter Animation
+            gsap.utils.toArray('.stat-counter').forEach((counter) => {
+                const value = parseInt(counter.dataset.value);
+                
+                ScrollTrigger.create({
+                    trigger: counter,
+                    start: 'top 80%',
+                    onEnter: () => {
+                        gsap.to(counter, {
+                            duration: 2,
+                            ease: 'power2.out',
+                            onUpdate: function() {
+                                const progress = this.progress();
+                                let currentValue = Math.floor(value * progress);
+                                if (value === 100) {
+                                    counter.textContent = currentValue + '+';
+                                } else if (value === 1000) {
+                                    counter.textContent = currentValue + '+';
+                                } else {
+                                    counter.textContent = currentValue;
+                                }
+                            }
+                        });
+                    },
+                    once: true
+                });
+            });
+
+            // Nav background on scroll
+            ScrollTrigger.create({
+                start: 'top -100',
+                onUpdate: (self) => {
+                    if (self.direction === 1 && self.progress > 0.1) {
+                        document.getElementById('mainNav').style.background = 'rgba(10, 10, 15, 0.9)';
+                        document.getElementById('mainNav').style.backdropFilter = 'blur(10px)';
+                    } else if (self.progress < 0.1) {
+                        document.getElementById('mainNav').style.background = 'transparent';
+                        document.getElementById('mainNav').style.backdropFilter = 'none';
+                    }
                 }
             });
-        }
-    });
-</script>
 
+            // Parallax for section numbers
+            gsap.utils.toArray('.section-number').forEach((num) => {
+                gsap.to(num, {
+                    scrollTrigger: {
+                        trigger: num,
+                        start: 'top bottom',
+                        end: 'bottom top',
+                        scrub: 1
+                    },
+                    y: -100,
+                    ease: 'none'
+                });
+            });
+
+            // Create floating particles
+            createParticles();
+        }
+
+        // Create floating particles in hero
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: ${Math.random() * 3 + 1}px;
+                    height: ${Math.random() * 3 + 1}px;
+                    background: rgba(249, 115, 22, ${Math.random() * 0.3 + 0.1});
+                    border-radius: 50%;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                `;
+                container.appendChild(particle);
+
+                gsap.to(particle, {
+                    y: Math.random() * 100 - 50,
+                    x: Math.random() * 100 - 50,
+                    opacity: Math.random() * 0.5,
+                    duration: Math.random() * 10 + 10,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'sine.inOut'
+                });
+            }
+        }
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    gsap.to(window, {
+                        duration: 1,
+                        scrollTo: { y: target, offsetY: 80 },
+                        ease: 'power3.inOut'
+                    });
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 </body>
 </html>
